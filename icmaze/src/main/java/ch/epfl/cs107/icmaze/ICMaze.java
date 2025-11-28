@@ -1,6 +1,7 @@
 package ch.epfl.cs107.icmaze;
 
 import ch.epfl.cs107.icmaze.actor.ICMazePlayer;
+import ch.epfl.cs107.icmaze.actor.collectable.Heart;
 import ch.epfl.cs107.icmaze.area.ICMazeArea;
 import ch.epfl.cs107.icmaze.area.maps.BossArea;
 import ch.epfl.cs107.icmaze.area.maps.Spawn;
@@ -8,6 +9,7 @@ import ch.epfl.cs107.play.areagame.AreaGame;
 import ch.epfl.cs107.play.io.FileSystem;
 import ch.epfl.cs107.play.math.DiscreteCoordinates;
 import ch.epfl.cs107.play.math.Orientation;
+import ch.epfl.cs107.play.math.Vector;
 import ch.epfl.cs107.play.window.Window;
 
 public class ICMaze extends AreaGame {
@@ -15,8 +17,9 @@ public class ICMaze extends AreaGame {
     private int areaIndex;
     private ICMazePlayer player;
 
+    private Heart heart;
     private DiscreteCoordinates initialPostion = new DiscreteCoordinates(5,7);
-
+    private DiscreteCoordinates heartPosition =  new DiscreteCoordinates(4,5);
     /**
      * Add all the IC Maze areas
      */
@@ -68,5 +71,7 @@ public class ICMaze extends AreaGame {
         player = new ICMazePlayer(area, Orientation.UP, initialPostion, "player");
         player.enterArea(area, initialPostion);
         player.centerCamera();
+        heart = new Heart(area, new DiscreteCoordinates(4,5));
+        heart.enterArea(area, heartPosition);
     }
 }

@@ -24,7 +24,7 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactable {
 
     private final static KeyBindings.PlayerKeyBindings keys = KeyBindings.PLAYER_KEY_BINDINGS; // Initialise les touches du joueur
     private final static String prefix = "icmaze/player"; // Lien de l'image ?
-    private final static int ANIMATION_DURATION = 1;
+    private final static int ANIMATION_DURATION = 1 ;
     private PlayerState state = PlayerState.IDLE; // L'etat du personnage
     private final static int MOVE_DURATION = 7;
 
