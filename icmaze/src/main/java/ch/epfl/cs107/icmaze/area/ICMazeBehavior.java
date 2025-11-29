@@ -79,7 +79,21 @@ public class ICMazeBehavior extends AreaBehavior {
 
        @Override
         protected boolean canEnter(Interactable entity) {
-            return !entity.takeCellSpace();
+            // Si la cellule n'est pas marchable dessus, personne ne peut rentrer
+           if (!type.isWalkable){
+               return false;
+           }
+           // Si l'entite est traversable. il peut rentrer
+           if (!entity.takeCellSpace()) {
+               return !entity.takeCellSpace();
+           }
+           // Si l'entite n'est pas traversable, verifier qu'aucune entite est presente
+            for (Interactable other : entities){
+                if (other.takeCellSpace()){
+                    return false;
+                }
+            }
+            return true;
         }
 
         @Override

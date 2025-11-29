@@ -95,7 +95,7 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactable {
 
     @Override
     public boolean takeCellSpace() {
-        return false;
+        return true;
     }
 
     @Override

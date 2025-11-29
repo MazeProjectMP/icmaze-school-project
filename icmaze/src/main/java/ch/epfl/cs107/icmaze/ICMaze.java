@@ -2,6 +2,7 @@ package ch.epfl.cs107.icmaze;
 
 import ch.epfl.cs107.icmaze.actor.ICMazePlayer;
 import ch.epfl.cs107.icmaze.actor.collectable.Heart;
+import ch.epfl.cs107.icmaze.actor.collectable.Pickaxe;
 import ch.epfl.cs107.icmaze.area.ICMazeArea;
 import ch.epfl.cs107.icmaze.area.maps.BossArea;
 import ch.epfl.cs107.icmaze.area.maps.Spawn;
@@ -18,8 +19,13 @@ public class ICMaze extends AreaGame {
     private ICMazePlayer player;
 
     private Heart heart;
+    private Pickaxe pickaxe;
+
+    // Positions initiales des entites de la map
     private DiscreteCoordinates initialPostion = new DiscreteCoordinates(5,7);
-    private DiscreteCoordinates heartPosition =  new DiscreteCoordinates(4,5);
+    private DiscreteCoordinates initialHeartPosition =  new DiscreteCoordinates(4,5);
+    private DiscreteCoordinates initialPickaxePosition =  new DiscreteCoordinates(5,4);
+
     /**
      * Add all the IC Maze areas
      */
@@ -68,10 +74,19 @@ public class ICMaze extends AreaGame {
      */
     private void initArea(String areaKey) {
         ICMazeArea area = (ICMazeArea) setCurrentArea(areaKey, true);
+
+        // Inititalise le main character
         player = new ICMazePlayer(area, Orientation.UP, initialPostion, "player");
         player.enterArea(area, initialPostion);
         player.centerCamera();
-        heart = new Heart(area, new DiscreteCoordinates(4,5));
-        heart.enterArea(area, heartPosition);
+
+        // Inititalise la pioche
+        pickaxe = new Pickaxe(area, initialPickaxePosition, Orientation.DOWN);
+        area.registerActor(pickaxe);
+
+        // Inititalise le coeur
+        heart = new Heart(area, initialHeartPosition);
+        area.registerActor(heart);
+
     }
 }
