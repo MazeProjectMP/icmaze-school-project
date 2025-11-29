@@ -37,7 +37,7 @@ public class Equipment extends CollectableAreaEntity {
 
     @Override
     public boolean isCellInteractable() {
-        return false;
+        return true;
     }
 
     @Override

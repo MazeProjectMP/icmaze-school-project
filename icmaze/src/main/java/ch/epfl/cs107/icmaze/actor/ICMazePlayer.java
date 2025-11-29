@@ -1,7 +1,11 @@
 package ch.epfl.cs107.icmaze.actor;
 
 import ch.epfl.cs107.icmaze.KeyBindings;
+import ch.epfl.cs107.icmaze.actor.collectable.Heart;
+import ch.epfl.cs107.icmaze.actor.collectable.Pickaxe;
+import ch.epfl.cs107.icmaze.handler.ICMazeInteractionVisitor;
 import ch.epfl.cs107.play.areagame.actor.Interactable;
+import ch.epfl.cs107.play.areagame.actor.Interactor;
 import ch.epfl.cs107.play.areagame.actor.MovableAreaEntity;
 import ch.epfl.cs107.play.areagame.area.Area;
 import ch.epfl.cs107.play.areagame.handler.AreaInteractionVisitor;
@@ -20,7 +24,7 @@ import java.util.Collections;
 import java.util.List;
 import static ch.epfl.cs107.play.math.Orientation.*;
 
-public class ICMazePlayer extends MovableAreaEntity implements Interactable {
+public class ICMazePlayer extends MovableAreaEntity implements Interactor, Interactable {
 
     private final static KeyBindings.PlayerKeyBindings keys = KeyBindings.PLAYER_KEY_BINDINGS; // Initialise les touches du joueur
     private final static String prefix = "icmaze/player"; // Lien de l'image ?
@@ -52,6 +56,26 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactable {
 
     }
 
+    private class ICMazePlayerInteractionHandler implements ICMazeInteractionVisitor {
+        @Override
+        public void interactWith(Heart heart, boolean isCellInteraction){
+            if(isCellInteraction){
+                heart.hide();
+            }
+        }
+        @Override
+        public void interactWith(Pickaxe pickaxe,boolean isCellInteraction){
+            if(isCellInteraction){
+                pickaxe.hide();
+            }
+        }
+    }
+
+    private final ICMazePlayerInteractionHandler handler = new ICMazePlayerInteractionHandler();
+
+    public void interactWith(Interactable other, boolean isCellInteraction){
+        other.acceptInteraction(handler, isCellInteraction);
+    }
     /**
      * @param deltaTime elapsed time since last update, in seconds, non-negative
      */
@@ -61,6 +85,7 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactable {
         if(!isDisplacementOccurs()){
             state = PlayerState.IDLE;
         }
+
         switch (state){
             case IDLE :
                 Keyboard keyboard = getOwnerArea().getKeyboard();
@@ -114,8 +139,23 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactable {
     }
 
     @Override
-    public void acceptInteraction(AreaInteractionVisitor v, boolean isCellInteraction) {
+    public List<DiscreteCoordinates> getFieldOfViewCells() {
+        return Collections.singletonList(getCurrentMainCellCoordinates().jump(getOrientation().toVector()));
+    }
 
+    @Override
+    public boolean wantsCellInteraction() {
+        return true;
+    }
+
+    @Override
+    public boolean wantsViewInteraction() {
+        return (state == PlayerState.INTERACTING); // Verifie l'etat
+    }
+
+    @Override
+    public void acceptInteraction(AreaInteractionVisitor v, boolean isCellInteraction) {
+        ((ICMazeInteractionVisitor) v).interactWith(this, isCellInteraction);
     }
 
     /**

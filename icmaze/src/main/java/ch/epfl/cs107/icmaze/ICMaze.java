@@ -81,7 +81,7 @@ public class ICMaze extends AreaGame {
         player.centerCamera();
 
         // Inititalise la pioche
-        pickaxe = new Pickaxe(area, initialPickaxePosition, Orientation.DOWN);
+        pickaxe = new Pickaxe(area, initialPickaxePosition);
         area.registerActor(pickaxe);
 
         // Inititalise le coeur
