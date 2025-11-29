@@ -2,6 +2,7 @@ package ch.epfl.cs107.icmaze.actor;
 
 import ch.epfl.cs107.icmaze.KeyBindings;
 import ch.epfl.cs107.icmaze.actor.collectable.Heart;
+import ch.epfl.cs107.icmaze.actor.collectable.Key;
 import ch.epfl.cs107.icmaze.actor.collectable.Pickaxe;
 import ch.epfl.cs107.icmaze.handler.ICMazeInteractionVisitor;
 import ch.epfl.cs107.play.areagame.actor.Interactable;
@@ -20,6 +21,7 @@ import ch.epfl.cs107.play.window.Button;
 import ch.epfl.cs107.play.window.Keyboard;
 
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import static ch.epfl.cs107.play.math.Orientation.*;
@@ -37,6 +39,8 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
     private final  Orientation[] orders = {DOWN, RIGHT, UP, LEFT};
     private final OrientedAnimation playerAnimation = new OrientedAnimation(prefix, ANIMATION_DURATION, this,anchor, orders, 4, 1, 2, 16, 32, true);
 
+    // Inventaire des cles
+    private final ArrayList<Integer> keysID = new ArrayList<Integer>();
     /**
      * @param owner (Area) area to which the player belong
      * @param orientation (Orientation) the initial orientation of the player
@@ -69,6 +73,14 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
                 pickaxe.hide();
             }
         }
+
+        @Override
+        public void interactWith(Key key, boolean isCellInteraction){
+            if(isCellInteraction){
+                keysID.add(key.getIdentificator());
+                key.hide();
+            }
+        }
     }
 
     private final ICMazePlayerInteractionHandler handler = new ICMazePlayerInteractionHandler();
@@ -85,10 +97,9 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
         if(!isDisplacementOccurs()){
             state = PlayerState.IDLE;
         }
-
+        Keyboard keyboard = getOwnerArea().getKeyboard();
         switch (state){
             case IDLE :
-                Keyboard keyboard = getOwnerArea().getKeyboard();
                 moveIfPressed(Orientation.LEFT, keyboard.get(keys.left()));
                 moveIfPressed(Orientation.UP, keyboard.get(keys.up()));
                 moveIfPressed(Orientation.RIGHT, keyboard.get(keys.right()));
@@ -103,8 +114,17 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
                 }else{
                     playerAnimation.reset();
                 }
+
+                // Mode interaction
+                if(keyboard.get(keys.interact()).isPressed()){
+                    state = PlayerState.INTERACTING;
+                }
                 break;
             case INTERACTING:
+                // Repasse en idle
+                if (!keyboard.get(keys.interact()).isDown()){
+                    state =  PlayerState.IDLE;
+                }
                 break;
         }
         super.update(deltaTime);

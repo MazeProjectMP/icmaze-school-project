@@ -6,12 +6,14 @@ import ch.epfl.cs107.play.engine.actor.Foreground;
 import ch.epfl.cs107.play.math.DiscreteCoordinates;
 
 public class Spawn extends ICMazeArea {
-    final static String name = "SmallArea";
+    private final static String name = "SmallArea";
+    private static final int sideSize = 8;
+
     /**
      * Set le nom du ICMazeBehavior de Spawn
      */
     public Spawn(){
-        super(name);
+        super(name, sideSize);
     }
     /**
      * @return the player's spawn position in the area
@@ -22,7 +24,7 @@ public class Spawn extends ICMazeArea {
     }
 
     @Override
-    protected void createArea() {
+    protected void registerTheme() {
         registerActor(new Background(this, name));
         registerActor(new Foreground(this, null, name));
     }

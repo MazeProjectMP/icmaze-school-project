@@ -9,7 +9,7 @@ import ch.epfl.cs107.play.math.Orientation;
 import ch.epfl.cs107.play.window.Canvas;
 
 public class Pickaxe extends Equipment {
-    private Sprite pickaxe;
+    private final Sprite pickaxe;
     private boolean isVisible = true;
     public Pickaxe(Area area, DiscreteCoordinates position){
         super(area, position);
