@@ -1,6 +1,7 @@
     package ch.epfl.cs107.icmaze;
 
     import ch.epfl.cs107.icmaze.actor.ICMazePlayer;
+    import ch.epfl.cs107.icmaze.actor.Portal;
     import ch.epfl.cs107.icmaze.actor.collectable.Heart;
     import ch.epfl.cs107.icmaze.actor.collectable.Key;
     import ch.epfl.cs107.icmaze.actor.collectable.Pickaxe;
@@ -8,10 +9,12 @@
     import ch.epfl.cs107.icmaze.area.maps.BossArea;
     import ch.epfl.cs107.icmaze.area.maps.Spawn;
     import ch.epfl.cs107.play.areagame.AreaGame;
+    import ch.epfl.cs107.play.areagame.area.Area;
     import ch.epfl.cs107.play.io.FileSystem;
     import ch.epfl.cs107.play.math.DiscreteCoordinates;
     import ch.epfl.cs107.play.math.Orientation;
     import ch.epfl.cs107.play.math.Vector;
+    import ch.epfl.cs107.play.window.Keyboard;
     import ch.epfl.cs107.play.window.Window;
 
     public class ICMaze extends AreaGame {
@@ -40,15 +43,29 @@
         /**
          * Add all the IC Maze areas
          */
+
+        private void teleportation(Portal portal){
+            final String destinationArea = portal.getDestinationArea();
+            final DiscreteCoordinates destinationCoordinates = portal.getDestinationCoordinates();
+            if(destinationArea != null){
+                player.leaveArea(); // Quitte la current aire
+
+                setCurrentArea(destinationArea, true); // Change l'aire courante
+
+                player.enterArea(getCurrentArea(), destinationCoordinates); // Teleporte le personnage dans l'aire
+
+                player.centerCamera(); // Centre la camera sur le personnage
+
+            }
+        }
+
         private void createAreas() {
             spawn = new Spawn();
             bossArea = new BossArea();
-            spawn.lockPortalWithKey(ICMazeArea.AreaPortals.E, Integer.MAX_VALUE);
-            bossArea.openPortal(ICMazeArea.AreaPortals.W);
-            spawn.arrivalArea(ICMazeArea.AreaPortals.E, bossArea);
-            bossArea.arrivalArea(ICMazeArea.AreaPortals.W, spawn);
-            addArea(new Spawn());
-            addArea(new BossArea());
+            spawn.lockPortalWithKey(ICMazeArea.AreaPortals.E, Integer.MAX_VALUE, bossArea.getTitle());
+            bossArea.openPortal(ICMazeArea.AreaPortals.W, spawn.getTitle());
+            addArea(spawn);
+            addArea(bossArea);
         }
 
         /**
@@ -73,6 +90,21 @@
         @Override
         public void update(float deltaTime) {
             super.update(deltaTime);
+
+
+            // Teleporte le player si interaction avec un portail ouvert
+            Portal portal = player.getPortalToTraverse();
+            if (player != null && portal != null) {
+                teleportation(portal);
+                player.clearPortalToTraverse();
+            }
+
+            // Reset si R est presse
+            Keyboard keyboard = getWindow().getKeyboard();
+            if (keyboard.get(KeyBindings.RESET_GAME).isPressed()) {
+                end();
+                begin(getWindow(), getFileSystem());
+            }
         }
 
         @Override

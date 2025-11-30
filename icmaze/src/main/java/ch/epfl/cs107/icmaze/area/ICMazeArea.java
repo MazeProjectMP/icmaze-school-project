@@ -63,45 +63,35 @@ public abstract class ICMazeArea extends Area {
         }
     }
 
-
     public void initPortals(){
-        portalNorth  = new Portal(this ,  Orientation.UP.opposite(),new DiscreteCoordinates(sizeSide / 2 , sizeSide + 1));
-        portalSouth  = new Portal(this ,  Orientation.DOWN.opposite(), new DiscreteCoordinates(sizeSide / 2, 0));
-        portalEast = new Portal(this ,  Orientation.RIGHT.opposite(), new DiscreteCoordinates(sizeSide + 1, sizeSide / 2));
-        portalWest = new Portal(this ,  Orientation.LEFT.opposite(), new DiscreteCoordinates(0, sizeSide / 2));
+        portalNorth  = new Portal(this ,  Orientation.UP.opposite(),new DiscreteCoordinates(sizeSide / 2 , sizeSide + 1), new DiscreteCoordinates(sizeSide / 2 , 1));
+        portalSouth  = new Portal(this ,  Orientation.DOWN.opposite(), new DiscreteCoordinates(sizeSide / 2, 0), new DiscreteCoordinates(sizeSide / 2, sizeSide));
+        portalEast = new Portal(this ,  Orientation.RIGHT.opposite(), new DiscreteCoordinates(sizeSide + 1, sizeSide / 2), new DiscreteCoordinates( 1, sizeSide / 2));
+        portalWest = new Portal(this ,  Orientation.LEFT.opposite(), new DiscreteCoordinates(0, sizeSide / 2), new DiscreteCoordinates(sizeSide, sizeSide / 2));
     }
 
     private void createArea(){
-        initPortals(); // D'abord, créer les portails
-        registerPortals(); // Puis, les enregistrer
+        registerPortals(); // Enregistrer les portails dans l'aire
         registerTheme();
     }
 
-    public void openPortal(AreaPortals portal) {
+    public void openPortal(AreaPortals portal, String destinationAreaName) {
         switch (portal) {
-            case W: portalWest.unlock(); break;
-            case E: portalEast.unlock(); break;
-            case N: portalNorth.unlock(); break;
-            case S: portalSouth.unlock(); break;
+            case W: portalWest.unlock(destinationAreaName); break;
+            case E: portalEast.unlock(destinationAreaName); break;
+            case N: portalNorth.unlock(destinationAreaName); break;
+            case S: portalSouth.unlock(destinationAreaName); break;
         }
     }
 
-    public void lockPortalWithKey(AreaPortals portal, int keyId) {
+    public void lockPortalWithKey(AreaPortals portal, int keyId, String destinationAreaName) {
         switch (portal) {
-            case W: portalWest.lock(keyId); break;
-            case E: portalEast.lock(keyId); break;
-            case N: portalNorth.lock(keyId); break;
-            case S: portalSouth.lock(keyId); break;
+            case W: portalWest.lock(keyId, destinationAreaName); break;
+            case E: portalEast.lock(keyId, destinationAreaName); break;
+            case N: portalNorth.lock(keyId, destinationAreaName); break;
+            case S: portalSouth.lock(keyId, destinationAreaName); break;
         }
     }
-
-    public void arrivalArea(AreaPortals portal, Area area) {
-        switch (portal) {
-            case W: portalWest.goTo(area.getTitle()); break;
-            case E: portalEast.goTo(area.getTitle()); break;
-            case N: portalNorth.goTo(area.getTitle()); break;
-            case S: portalSouth.goTo(area.getTitle()); break;
-        }}
 
     protected abstract void registerTheme();
 

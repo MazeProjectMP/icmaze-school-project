@@ -28,7 +28,6 @@ public class BossArea extends ICMazeArea {
         registerActor(new Foreground(this, null, name)); // A verifier
     }
 
-
     @Override
     public String getTitle() {
         return "icmaze/Boss";

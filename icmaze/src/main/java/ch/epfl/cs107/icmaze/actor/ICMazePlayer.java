@@ -41,6 +41,9 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
 
     // Inventaire des cles
     private final ArrayList<Integer> keysID = new ArrayList<Integer>();
+
+    // Portail a traverser
+    private Portal portalToTraverse = null;
     /**
      * @param owner (Area) area to which the player belong
      * @param orientation (Orientation) the initial orientation of the player
@@ -81,6 +84,17 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
                 key.hide();
             }
         }
+
+        @Override
+        public void interactWith(Portal portal, boolean isCellInteraction){
+            if(isCellInteraction && portal.getState() == Portal.PortalState.OPEN) {
+                portalToTraverse = portal; // Assigner le portail a traverser
+            } else if(isViewInteractable() && state.equals(PlayerState.INTERACTING)){
+                for(Integer keyID : keysID){
+                    portal.open(keyID);
+                }
+            }
+        }
     }
 
     private final ICMazePlayerInteractionHandler handler = new ICMazePlayerInteractionHandler();
@@ -88,6 +102,15 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
     public void interactWith(Interactable other, boolean isCellInteraction){
         other.acceptInteraction(handler, isCellInteraction);
     }
+
+    public Portal getPortalToTraverse() {
+        return portalToTraverse;
+    }
+
+    public void clearPortalToTraverse() {
+        portalToTraverse = null;
+    }
+
     /**
      * @param deltaTime elapsed time since last update, in seconds, non-negative
      */
@@ -123,7 +146,7 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
             case INTERACTING:
                 // Repasse en idle
                 if (!keyboard.get(keys.interact()).isDown()){
-                    state =  PlayerState.IDLE;
+                    state = PlayerState.IDLE;
                 }
                 break;
         }
