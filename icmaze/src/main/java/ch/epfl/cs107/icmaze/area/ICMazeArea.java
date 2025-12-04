@@ -49,6 +49,8 @@ public abstract class ICMazeArea extends Area {
         return false;
     }
 
+    public abstract void lockPortalWithKey(AreaPortals areaPortals, int maxValue);
+
     public enum AreaPortals {
         N(Orientation.UP),
         W(Orientation.LEFT),
@@ -70,7 +72,8 @@ public abstract class ICMazeArea extends Area {
         portalWest = new Portal(this ,  Orientation.LEFT.opposite(), new DiscreteCoordinates(0, sizeSide / 2), new DiscreteCoordinates(sizeSide, sizeSide / 2));
     }
 
-    private void createArea(){
+    public void createArea(){
+
         registerPortals(); // Enregistrer les portails dans l'aire
         registerTheme();
     }
@@ -92,7 +95,20 @@ public abstract class ICMazeArea extends Area {
             case S: portalSouth.lock(keyId, destinationAreaName); break;
         }
     }
+    public void arrivalArea(AreaPortals portal, Area area) {
+        switch (portal) {
+            case W -> portalWest.setDestinationArea(area.getTitle());
+            case E -> portalEast.setDestinationArea(area.getTitle());
+            case N -> portalNorth.setDestinationArea(area.getTitle());
+            case S -> portalSouth.setDestinationArea(area.getTitle());
+        }
+    }
 
+
+    //attribue la difficulte de la area
+    public int setDifficulty(int difficulty) {
+        return difficulty;
+    }
     protected abstract void registerTheme();
 
     private void registerPortals(){

@@ -6,6 +6,9 @@
     import ch.epfl.cs107.icmaze.actor.collectable.Key;
     import ch.epfl.cs107.icmaze.actor.collectable.Pickaxe;
     import ch.epfl.cs107.icmaze.area.ICMazeArea;
+    import ch.epfl.cs107.icmaze.area.LargeArea;
+    import ch.epfl.cs107.icmaze.area.MediumArea;
+    import ch.epfl.cs107.icmaze.area.SmallArea;
     import ch.epfl.cs107.icmaze.area.maps.BossArea;
     import ch.epfl.cs107.icmaze.area.maps.Spawn;
     import ch.epfl.cs107.play.areagame.AreaGame;
@@ -18,7 +21,7 @@
     import ch.epfl.cs107.play.window.Window;
 
     public class ICMaze extends AreaGame {
-        private final String[] areas = {"icmaze/Spawn", "icmaze/Boss"};
+        private final String[] areas = {"icmaze/Spawn", "icmaze/Boss", "icmaze/SmallArea","icmaze/MediumArea" , "icmaze/LargeArea"};
         private int areaIndex;
         private ICMazePlayer player;
 
@@ -40,6 +43,9 @@
         // Declaration des Aires :
         private Spawn spawn = new Spawn();
         private BossArea bossArea = new BossArea();
+        private SmallArea smallArea = new SmallArea(ICMazeArea.AreaPortals.E,ICMazeArea.AreaPortals.W, Difficulty.HARDEST  );
+        private MediumArea mediumArea = new MediumArea();
+        private LargeArea largeArea = new LargeArea();
         /**
          * Add all the IC Maze areas
          */
@@ -60,12 +66,53 @@
         }
 
         private void createAreas() {
+            generateHardCodedLevel();
+
+        }
+        private void generateHardCodedLevel() {
+
+            // Création des aires
             spawn = new Spawn();
             bossArea = new BossArea();
-            spawn.lockPortalWithKey(ICMazeArea.AreaPortals.E, Integer.MAX_VALUE, bossArea.getTitle());
-            bossArea.openPortal(ICMazeArea.AreaPortals.W, spawn.getTitle());
+            smallArea = new SmallArea();
+            mediumArea = new MediumArea();
+            largeArea = new LargeArea();
+
+
+            //  Configuration des portails
+            spawn.lockPortalWithKey(ICMazeArea.AreaPortals.E, Integer.MAX_VALUE);
+            bossArea.openPortal(ICMazeArea.AreaPortals.W, "spawn");
+            smallArea.openPortal(ICMazeArea.AreaPortals.W, "smallArea");
+            mediumArea.openPortal(ICMazeArea.AreaPortals.W, "smallArea");
+            largeArea.openPortal(ICMazeArea.AreaPortals.W, "mediumArea");
+
+            // Relier les aires entre elles
+            spawn.arrivalArea(ICMazeArea.AreaPortals.E, smallArea);
+            smallArea.arrivalArea(ICMazeArea.AreaPortals.W, spawn);
+
+            smallArea.arrivalArea(ICMazeArea.AreaPortals.E, mediumArea);
+            mediumArea.arrivalArea(ICMazeArea.AreaPortals.W, smallArea);
+
+            mediumArea.arrivalArea(ICMazeArea.AreaPortals.E, largeArea);
+            largeArea.arrivalArea(ICMazeArea.AreaPortals.W, mediumArea);
+
+            largeArea.arrivalArea(ICMazeArea.AreaPortals.E, bossArea);
+            bossArea.arrivalArea(ICMazeArea.AreaPortals.W, largeArea);
+
+            //locks the portal
+            spawn.lockPortalWithKey(ICMazeArea.AreaPortals.E, Integer.MAX_VALUE);
+//difficulte
+            smallArea.setDifficulty(Difficulty.HARDEST);
+            mediumArea.setDifficulty(Difficulty.HARDEST);
+            largeArea.setDifficulty(Difficulty.HARDEST);
+
+            // Ajout des aires au jeu
             addArea(spawn);
             addArea(bossArea);
+            addArea( smallArea);
+            addArea(mediumArea);
+            addArea(largeArea);
+
         }
 
         /**

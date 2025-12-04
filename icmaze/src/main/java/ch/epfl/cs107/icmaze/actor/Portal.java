@@ -107,6 +107,7 @@ public class Portal extends AreaEntity {
                 getOrientation().ordinal()%2)));
     }
 
+
     @Override
     public boolean takeCellSpace() {
         return isNotTraversable();

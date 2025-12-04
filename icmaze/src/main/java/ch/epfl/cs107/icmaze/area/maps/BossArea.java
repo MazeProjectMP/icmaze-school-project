@@ -23,6 +23,11 @@ public class BossArea extends ICMazeArea {
     }
 
     @Override
+    public void lockPortalWithKey(AreaPortals areaPortals, int maxValue) {
+
+    }
+
+    @Override
     protected void registerTheme() {
         registerActor(new Background(this, name)); // A verifier
         registerActor(new Foreground(this, null, name)); // A verifier

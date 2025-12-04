@@ -17,6 +17,16 @@ public final class MazeGenerator {
     /**
      * Print the maze
      */
+    /**
+     * Print the maze
+     */
+//    public static int [][] createMaze(int width , int height , int difficulty){
+////        public DiscreteCoordinates cell; //coordonnées de la cellule en haut à gauche  de la cellule ousRegion;
+////        private int x ; //• width : la largeur de la sous-région ;
+////        int height ;// hauteur de la sous region
+//
+//
+//    }
     public static void printMaze(int[][] grid, DiscreteCoordinates start, DiscreteCoordinates end) {
         int height = grid.length;
         int width = grid[0].length;
