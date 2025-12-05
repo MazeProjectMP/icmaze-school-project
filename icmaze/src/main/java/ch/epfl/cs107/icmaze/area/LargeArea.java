@@ -41,26 +41,26 @@ public class LargeArea extends ICMazeArea{
 
     @Override
     public void createArea() {
+//        ICMazePlayer player = ;
+        DiscreteCoordinates posJoueur = new DiscreteCoordinates(1,1 );
+
         int[][] maze = MazeGenerator.createMaze(getSize(), getSize(), difficulty);
 
-        DiscreteCoordinates entry = getEntryCoordinates();
-        DiscreteCoordinates exit =
-        ICMazePlayer player;
-        DiscreteCoordinates entry = player.getPlayerPosition(); // entrée = position du player
-
+        DiscreteCoordinates entry = posJoueur;  // entrée = position du player
+        DiscreteCoordinates exit = new DiscreteCoordinates(31,31);
         for (int y = 0; y < maze.length; y++) {               // y = ligne
             for (int x = 0; x < maze[0].length; x++) {
                 DiscreteCoordinates pos = new DiscreteCoordinates(x, y);
 
-                if (pos.equals(start)) {
-                    // portail d'entrée
-                    Portal entry = new Portal(this, Orientation.UP, pos, getExitCoordinates());
-                    registerActor(entry);
-                } else if (pos.equals(end)) {
-                    // portail de sortie
-                    Portal exit = new Portal(this, Orientation.UP, pos, getEntryCoordinates());
-                    registerActor(exit);
-                } else if (maze[y][x] == 1) {
+//                if (pos.equals(entry)) {
+//                    // portail d'entrée
+//                    Portal entry = new Portal(this, Orientation.UP, pos, getExitCoordinates());
+//                    registerActor(entry);
+//                } else if (pos.equals(end)) {
+//                    // portail de sortie
+//                    Portal exit = new Portal(this, Orientation.UP, pos, getEntryCoordinates());
+//                    registerActor(exit);
+//                } else if (maze[y][x] == 1) {
                     // mur classique
                     Rock rock = new Rock(this, pos);
                     registerActor(rock);
@@ -70,7 +70,7 @@ public class LargeArea extends ICMazeArea{
             }
 
         }
-
+    }
         @Override
         protected void registerTheme() {}
 //

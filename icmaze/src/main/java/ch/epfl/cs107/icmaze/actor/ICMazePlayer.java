@@ -54,9 +54,9 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
         super(owner, orientation, coordinates);
         resetMotion();
     }
-    public DiscreteCoordinates getPlayerPosition() {
-        return getCurrentMainCellCoordinates();
-    }
+//    public DiscreteCoordinates getPlayerPosition() {
+//        return getCurrentMainCellCoordinates();
+//    }
 
 
     // Differents etats du personnage
