@@ -27,6 +27,10 @@ public class Rock extends AreaEntity {
         sprite = new Sprite("rock.2", 1, 1 , this );
 
     }
+    public Rock(Area area, DiscreteCoordinates position) {
+        super(area, Orientation.UP, position);
+        sprite = new Sprite("rock.2", 1, 1, this);
+    }
     @Override
     // Dessine le sprite du rocher
 

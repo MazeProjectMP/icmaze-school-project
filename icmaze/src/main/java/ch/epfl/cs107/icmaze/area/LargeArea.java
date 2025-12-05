@@ -1,7 +1,14 @@
 package ch.epfl.cs107.icmaze.area;
 
 import ch.epfl.cs107.icmaze.Difficulty;
+import ch.epfl.cs107.icmaze.MazeGenerator;
+import ch.epfl.cs107.icmaze.actor.ICMazePlayer;
+import ch.epfl.cs107.icmaze.actor.Portal;
+import ch.epfl.cs107.icmaze.actor.Rock;
 import ch.epfl.cs107.play.math.DiscreteCoordinates;
+import ch.epfl.cs107.play.math.Orientation;
+
+import static jdk.internal.jimage.decompressor.CompressedResourceHeader.getSize;
 
 public class LargeArea extends ICMazeArea{
     private AreaPortals areaPortalEntry;
@@ -34,21 +41,46 @@ public class LargeArea extends ICMazeArea{
 
     @Override
     public void createArea() {
+        int[][] maze = MazeGenerator.createMaze(getSize(), getSize(), difficulty);
 
-    }
+        DiscreteCoordinates entry = getEntryCoordinates();
+        DiscreteCoordinates exit =
+        ICMazePlayer player;
+        DiscreteCoordinates entry = player.getPlayerPosition(); // entrée = position du player
 
-    @Override
-    protected void registerTheme() {
+        for (int y = 0; y < maze.length; y++) {               // y = ligne
+            for (int x = 0; x < maze[0].length; x++) {
+                DiscreteCoordinates pos = new DiscreteCoordinates(x, y);
 
-    }
+                if (pos.equals(start)) {
+                    // portail d'entrée
+                    Portal entry = new Portal(this, Orientation.UP, pos, getExitCoordinates());
+                    registerActor(entry);
+                } else if (pos.equals(end)) {
+                    // portail de sortie
+                    Portal exit = new Portal(this, Orientation.UP, pos, getEntryCoordinates());
+                    registerActor(exit);
+                } else if (maze[y][x] == 1) {
+                    // mur classique
+                    Rock rock = new Rock(this, pos);
+                    registerActor(rock);
+                }
+
+
+            }
+
+        }
+
+        @Override
+        protected void registerTheme() {}
 //
 //    @Override
 //    public AreaPortals getEntryPortal() {
 //        return null;
 //    }
 
-    @Override
-    public String getTitle() {
-        return "";
-    }
+        @Override
+        public String getTitle () {
+            return "";
+        }
 }

@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 
+
 /**
  * Area is a "Part" of the AreaGame. An Area is made of a Behavior, and a List of Actors
  */
@@ -55,7 +56,12 @@ public abstract class Area implements Playable, Graphics, PauseMenu.Pausable {
     /**
      * @return (float): camera scale factor, assume it is the same in x and y direction
      */
+    protected final static float DYNAMIC_SCALE_MULTIPLIER = 1.375f;
+    protected final static float MAXIMUM_SCALE =30;
+    protected float size ;
+
     public abstract float getCameraScaleFactor();
+
 
     /**
      * Setter for the Behavior of this Area
