@@ -17,6 +17,18 @@ public class BossArea extends ICMazeArea {
     /**
      * @return the player's spawn position in the area
      */
+//    public DiscreteCoordinates getWestPortalSpawn() {
+//        return new DiscreteCoordinates(sideSize + 1, sideSize / 2);
+//    }
+//    public DiscreteCoordinates getEstPortalSpawn() {
+//        return new DiscreteCoordinates(0, sideSize / 2);
+//    }
+//    public DiscreteCoordinates getNorthPortalSpawn(){
+//        return new DiscreteCoordinates(sideSize/2, 0);
+//    }
+//    public DiscreteCoordinates getSouthPortalSpawn(){
+//        return new DiscreteCoordinates(sideSize/2, sideSize + 1);
+//    }
     @Override
     public DiscreteCoordinates getPlayerSpawnPosition() {
         return new DiscreteCoordinates(0, 0);

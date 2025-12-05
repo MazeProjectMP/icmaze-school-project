@@ -27,22 +27,22 @@ public class Portal extends AreaEntity {
 
     private String destinationAreaName = null;
     private DiscreteCoordinates destinationCoordinates;
-    
-    public Portal(Area area, Orientation orientation, DiscreteCoordinates portalCoordinates, int identificator, DiscreteCoordinates destinationCoordinates) {
+
+    public Portal(Area area, Orientation orientation, DiscreteCoordinates portalCoordinates, int identificator) {
         super(area, orientation, portalCoordinates);
         state = PortalState.INVISIBLE;
         this.areaName = area.getTitle();
 //        this.portalCoordinates = portalCoordinates;
-        this.destinationCoordinates = destinationCoordinates;
+//        this.destinationCoordinates = destinationCoordinates;
         this.identificator = identificator;
     }
 
-    public Portal(Area area, Orientation orientation, DiscreteCoordinates portalCoordinates, DiscreteCoordinates destinationCoordinates) {
+    public Portal(Area area, Orientation orientation, DiscreteCoordinates portalCoordinates) {
         super(area, orientation, portalCoordinates);
         state = PortalState.INVISIBLE;
         this.areaName = area.getTitle();
 //        this.portalCoordinates = portalCoordinates;
-        this.destinationCoordinates = destinationCoordinates;
+//        this.destinationCoordinates = destinationCoordinates;
         this.identificator = NO_KEY_ID;
     }
 
@@ -76,6 +76,9 @@ public class Portal extends AreaEntity {
     }
     public void setDestinationArea(String destinationAreaName) {
         this.destinationAreaName = destinationAreaName;
+    }
+    public void setDestinationCoordinates(DiscreteCoordinates coordinates){
+        this.destinationCoordinates = coordinates;
     }
     public DiscreteCoordinates getDestinationCoordinates() {
         return destinationCoordinates;
