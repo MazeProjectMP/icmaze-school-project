@@ -75,9 +75,13 @@ public abstract class ICMazeArea extends Area {
         portalWest = new Portal(this ,  Orientation.LEFT.opposite(), new DiscreteCoordinates(0, sizeSide / 2));
     }
 
-    private void createArea(){
+    protected void createArea(){
         registerPortals(); // Enregistrer les portails dans l'aire
         registerTheme();
+    }
+
+    public int getSizeSide() {
+        return sizeSide;
     }
 
     public void openPortal(AreaPortals portal, String destinationAreaName) {
@@ -110,16 +114,16 @@ public abstract class ICMazeArea extends Area {
 
 
     public DiscreteCoordinates getWestPortalSpawn() {
-        return new DiscreteCoordinates(sizeSide + 1, sizeSide / 2);
+        return new DiscreteCoordinates(sizeSide, sizeSide / 2);
     }
     public DiscreteCoordinates getEstPortalSpawn() {
-        return new DiscreteCoordinates(0, sizeSide / 2);
+        return new DiscreteCoordinates(1, sizeSide / 2);
     }
     public DiscreteCoordinates getNorthPortalSpawn(){
-        return new DiscreteCoordinates(sizeSide/2, 0);
+        return new DiscreteCoordinates(sizeSide/2, 1);
     }
     public DiscreteCoordinates getSouthPortalSpawn() {
-        return new DiscreteCoordinates(sizeSide / 2, sizeSide + 1);
+        return new DiscreteCoordinates(sizeSide / 2, sizeSide);
     }
 
     private void registerTheme() {

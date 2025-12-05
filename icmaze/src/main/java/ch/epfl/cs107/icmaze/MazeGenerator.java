@@ -1,5 +1,6 @@
 package ch.epfl.cs107.icmaze;
 
+import java.util.Arrays;
 import java.util.Random;
 
 import ch.epfl.cs107.play.areagame.area.Area;
@@ -19,6 +20,7 @@ public final class MazeGenerator {
 
         int [][] maze = new int [height][width]; // Grille vide
 
+        // Matrice a 0
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
                 maze[i][j] = 0;

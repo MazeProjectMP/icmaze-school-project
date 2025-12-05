@@ -23,19 +23,6 @@ public class Spawn extends ICMazeArea {
         return new DiscreteCoordinates(5, 7);
     }
 
-    public DiscreteCoordinates getWestPortalSpawn() {
-        return new DiscreteCoordinates(sideSize + 1, sideSize / 2);
-    }
-    public DiscreteCoordinates getEstPortalSpawn() {
-        return new DiscreteCoordinates(0, sideSize / 2);
-    }
-    public DiscreteCoordinates getNorthPortalSpawn(){
-        return new DiscreteCoordinates(sideSize/2, 0);
-    }
-    public DiscreteCoordinates getSouthPortalSpawn() {
-        return new DiscreteCoordinates(sideSize / 2, sideSize + 1);
-    }
-
     @Override
     public String getTitle() {
         return "icmaze/Spawn";

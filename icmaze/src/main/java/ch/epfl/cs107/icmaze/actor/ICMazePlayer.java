@@ -76,7 +76,6 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
         @Override
         public void interactWith(Pickaxe pickaxe,boolean isCellInteraction){
             if(isCellInteraction){
-
                 pickaxe.hide();
             }
         }

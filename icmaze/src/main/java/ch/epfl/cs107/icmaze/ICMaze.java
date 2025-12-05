@@ -125,10 +125,10 @@
 
             largeArea.openPortal(ICMazeArea.AreaPortals.W, mediumArea.getTitle());
             largeArea.openPortal(ICMazeArea.AreaPortals.E, bossArea.getTitle());
-            largeArea.setDestinationCoordinate(ICMazeArea.AreaPortals.E, mediumArea.getEstPortalSpawn());
-            largeArea.setDestinationCoordinate(ICMazeArea.AreaPortals.W, bossArea.getWestPortalSpawn());
+            largeArea.setDestinationCoordinate(ICMazeArea.AreaPortals.W, mediumArea.getWestPortalSpawn());
+            largeArea.setDestinationCoordinate(ICMazeArea.AreaPortals.E, bossArea.getEstPortalSpawn());
 
-            bossArea.openPortal(ICMazeArea.AreaPortals.W, bossArea.getTitle());
+            bossArea.openPortal(ICMazeArea.AreaPortals.W, largeArea.getTitle());
             bossArea.setDestinationCoordinate(ICMazeArea.AreaPortals.W, largeArea.getWestPortalSpawn());
 
             // Ajout des aires au jeu

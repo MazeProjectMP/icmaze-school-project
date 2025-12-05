@@ -1,5 +1,7 @@
 package ch.epfl.cs107.icmaze.area.maps;
 import ch.epfl.cs107.icmaze.Difficulty;
+import ch.epfl.cs107.icmaze.MazeGenerator;
+import ch.epfl.cs107.icmaze.actor.Rock;
 import ch.epfl.cs107.icmaze.area.ICMazeArea;
 import ch.epfl.cs107.play.math.DiscreteCoordinates;
 
@@ -22,19 +24,24 @@ public class MazeLevels extends ICMazeArea {
         this.keyID = keyID;
     }
 
-//    public DiscreteCoordinates getWestPortalSpawn() {
-//        return new DiscreteCoordinates(getSizeSide() + 1, getSizeSide() / 2);
-//    }
-//    public DiscreteCoordinates getEstPortalSpawn() {
-//        return new DiscreteCoordinates(0, getSizeSide() / 2);
-//    }
-//    public DiscreteCoordinates getNorthPortalSpawn(){
-//        return new DiscreteCoordinates(getSizeSide()/2, 0);
-//    }
-//    public DiscreteCoordinates getSouthPortalSpawn(){
-//        return new DiscreteCoordinates(getSizeSide()/2, getSizeSide() + 1);
-//    }
+    @Override
+    public void createArea() {
+        super.createArea();
+        generateMaze(); // Generation de maxe
+    }
 
+
+    public void generateMaze(){
+        int[][] maze = MazeGenerator.createMaze(getSizeSide(), getSizeSide(), Difficulty.HARDEST);
+        for(int y = 0; y < getSizeSide(); y++){
+            for(int x = 0; x < getSizeSide(); x++){
+                if(maze[x][y] == 1 && notInSpawn(x,y)){
+                    Rock rock = new Rock(this, new DiscreteCoordinates(x,y));
+                    registerActor(rock);
+                }
+            }
+        }
+    }
     /**
      * @return the player's spawn position in the area
      */
