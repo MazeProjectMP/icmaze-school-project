@@ -13,9 +13,11 @@ public final class MazeGenerator extends Area {
     private static final int WALL = 1;
     private static final int EMPTY = 0;
     private static final Random random = RandomGenerator.rng;
+    private final static float DYNAMIC_SCALE_MULTIPLIER = 1.375f;
+    private final static float MAXIMUM_SCALE =30;
+    private float size ;
 
     private MazeGenerator() {}
-
     /**
      * Print the maze
      */
@@ -157,6 +159,7 @@ public final class MazeGenerator extends Area {
     public float getCameraScaleFactor() {
         return (float) Math.min(size * DYNAMIC_SCALE_MULTIPLIER ,
                 MAXIMUM_SCALE);
+
     }
 
     @Override

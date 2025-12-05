@@ -8,12 +8,16 @@ import ch.epfl.cs107.icmaze.actor.Rock;
 import ch.epfl.cs107.play.math.DiscreteCoordinates;
 import ch.epfl.cs107.play.math.Orientation;
 
+import java.util.List;
+
 import static jdk.internal.jimage.decompressor.CompressedResourceHeader.getSize;
 
-public class LargeArea extends ICMazeArea{
+public class LargeArea extends ICMazeArea {
     private AreaPortals areaPortalEntry;
     private AreaPortals areaPortalExit;
     private int difficulty;
+    private Portal portal;
+
     public LargeArea(AreaPortals areaPortalEntry, AreaPortals areaPortalExit, int difficulty) {
         super("LargeArea", 32);
 
@@ -42,37 +46,32 @@ public class LargeArea extends ICMazeArea{
     @Override
     public void createArea() {
 //        ICMazePlayer player = ;
-        DiscreteCoordinates posJoueur = new DiscreteCoordinates(1,1 );
+
+//        DiscreteCoordinates posJoueur = new DiscreteCoordinates(1, 1);
 
         int[][] maze = MazeGenerator.createMaze(getSize(), getSize(), difficulty);
+        
+        DiscreteCoordinates entry =  portal.getCurrentMainCellCoordinates(); // entrée de la map
+        DiscreteCoordinates exit = portal.getDestinationCoordinates();
 
-        DiscreteCoordinates entry = posJoueur;  // entrée = position du player
-        DiscreteCoordinates exit = new DiscreteCoordinates(31,31);
+//        Rock premiereRock = new Rock(maze[1][1],this,maze[1][1] )
         for (int y = 0; y < maze.length; y++) {               // y = ligne
-            for (int x = 0; x < maze[0].length; x++) {
-                DiscreteCoordinates pos = new DiscreteCoordinates(x, y);
+                 for (int x = 0; x < maze[0].length; x++) {
+                         DiscreteCoordinates pos = new DiscreteCoordinates(x, y);
 
-//                if (pos.equals(entry)) {
-//                    // portail d'entrée
-//                    Portal entry = new Portal(this, Orientation.UP, pos, getExitCoordinates());
-//                    registerActor(entry);
-//                } else if (pos.equals(end)) {
-//                    // portail de sortie
-//                    Portal exit = new Portal(this, Orientation.UP, pos, getEntryCoordinates());
-//                    registerActor(exit);
-//                } else if (maze[y][x] == 1) {
-                    // mur classique
-                    Rock rock = new Rock(this, pos);
-                    registerActor(rock);
-                }
+                         if (pos!= entry && pos!=exit && maze[x][y]==1 ) {
+                             Rock rock =new Rock(this, pos);
+                             registerActor(rock);
+                         }
 
-
-            }
+                 }
 
         }
     }
-        @Override
-        protected void registerTheme() {}
+
+    @Override
+    protected void registerTheme() {
+    }
 //
 //    @Override
 //    public AreaPortals getEntryPortal() {
@@ -82,5 +81,5 @@ public class LargeArea extends ICMazeArea{
         @Override
         public String getTitle () {
             return "";
-        }
+    }
 }
