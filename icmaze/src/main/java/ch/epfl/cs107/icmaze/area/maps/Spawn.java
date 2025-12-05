@@ -23,11 +23,6 @@ public class Spawn extends ICMazeArea {
         return new DiscreteCoordinates(5, 7);
     }
 
-    @Override
-    protected void registerTheme() {
-        registerActor(new Background(this, name));
-        registerActor(new Foreground(this, null, name));
-    }
 
     @Override
     public String getTitle() {

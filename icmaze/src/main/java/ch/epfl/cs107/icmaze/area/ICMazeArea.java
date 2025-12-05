@@ -3,10 +3,14 @@ package ch.epfl.cs107.icmaze.area;
 import ch.epfl.cs107.icmaze.actor.Portal;
 import ch.epfl.cs107.play.areagame.area.Area;
 import ch.epfl.cs107.play.engine.actor.Actor;
+import ch.epfl.cs107.play.engine.actor.Background;
+import ch.epfl.cs107.play.engine.actor.Foreground;
 import ch.epfl.cs107.play.io.FileSystem;
 import ch.epfl.cs107.play.math.DiscreteCoordinates;
 import ch.epfl.cs107.play.math.Orientation;
 import ch.epfl.cs107.play.window.Window;
+
+import java.util.HashMap;
 
 public abstract class ICMazeArea extends Area {
     private String title;
@@ -19,6 +23,7 @@ public abstract class ICMazeArea extends Area {
     private Portal portalEast;
     private Portal portalNorth;
     private Portal portalSouth;
+
     /**
      * Area specific callback to initialise the instance
      */
@@ -77,23 +82,26 @@ public abstract class ICMazeArea extends Area {
 
     public void openPortal(AreaPortals portal, String destinationAreaName) {
         switch (portal) {
-            case W: portalWest.unlock(destinationAreaName); break;
-            case E: portalEast.unlock(destinationAreaName); break;
-            case N: portalNorth.unlock(destinationAreaName); break;
-            case S: portalSouth.unlock(destinationAreaName); break;
+            case W -> portalWest.unlock(destinationAreaName);
+            case E -> portalEast.unlock(destinationAreaName);
+            case N -> portalNorth.unlock(destinationAreaName);
+            case S -> portalSouth.unlock(destinationAreaName);
         }
     }
 
     public void lockPortalWithKey(AreaPortals portal, int keyId, String destinationAreaName) {
         switch (portal) {
-            case W: portalWest.lock(keyId, destinationAreaName); break;
-            case E: portalEast.lock(keyId, destinationAreaName); break;
-            case N: portalNorth.lock(keyId, destinationAreaName); break;
-            case S: portalSouth.lock(keyId, destinationAreaName); break;
+            case W -> portalWest.lock(keyId, destinationAreaName);
+            case E -> portalEast.lock(keyId, destinationAreaName);
+            case N -> portalNorth.lock(keyId, destinationAreaName);
+            case S -> portalSouth.lock(keyId, destinationAreaName);
         }
     }
 
-    protected abstract void registerTheme();
+    private void registerTheme() {
+        registerActor(new Background(this, title));
+        registerActor(new Foreground(this, null, title));
+    }
 
     private void registerPortals(){
         this.registerActor(portalWest);

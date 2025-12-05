@@ -15,7 +15,7 @@ import java.util.List;
 
 public class Portal extends AreaEntity {
 
-    private DiscreteCoordinates portalCoordinates;
+//    private DiscreteCoordinates portalCoordinates;
     private String areaName;
     private final static int NO_KEY_ID = Integer.MIN_VALUE;
     private int identificator;
@@ -32,9 +32,8 @@ public class Portal extends AreaEntity {
         super(area, orientation, portalCoordinates);
         state = PortalState.INVISIBLE;
         this.areaName = area.getTitle();
-        this.portalCoordinates = portalCoordinates;
+//        this.portalCoordinates = portalCoordinates;
         this.destinationCoordinates = destinationCoordinates;
-        
         this.identificator = identificator;
     }
 
@@ -42,11 +41,20 @@ public class Portal extends AreaEntity {
         super(area, orientation, portalCoordinates);
         state = PortalState.INVISIBLE;
         this.areaName = area.getTitle();
-        this.portalCoordinates = portalCoordinates;
+//        this.portalCoordinates = portalCoordinates;
         this.destinationCoordinates = destinationCoordinates;
         this.identificator = NO_KEY_ID;
     }
 
+    public Portal(Portal portal){
+        super(portal.getOwnerArea(), portal.getOrientation() , portal.getCurrentMainCellCoordinates());
+        state = portal.getState();
+        this.areaName = portal.areaName;
+        this.destinationCoordinates = portal.getDestinationCoordinates();
+        this.identificator = portal.identificator;
+        this.isNotTraversable = portal.isNotTraversable();
+        this.destinationAreaName = portal.destinationAreaName;
+    }
 //    public Portal(Area area, Orientation orientation, DiscreteCoordinates portalPosition, int identificator, DiscreteCoordinates portalCoordinates) {
 //        super(area, orientation, portalPosition);
 //        state = PortalState.INVISIBLE;
@@ -160,4 +168,5 @@ public class Portal extends AreaEntity {
             portal.draw(canvas);
         }
     }
+
 }

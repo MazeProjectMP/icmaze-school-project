@@ -42,8 +42,11 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
     // Inventaire des cles
     private final ArrayList<Integer> keysID = new ArrayList<Integer>();
 
-    // Portail a traverser
-    private Portal portalToTraverse = null;
+    // Info du portail a traverser
+    private String destinationArea;
+
+    private DiscreteCoordinates destinationCoordinates;
+
     /**
      * @param owner (Area) area to which the player belong
      * @param orientation (Orientation) the initial orientation of the player
@@ -88,7 +91,8 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
         @Override
         public void interactWith(Portal portal, boolean isCellInteraction){
             if(isCellInteraction && portal.getState() == Portal.PortalState.OPEN) {
-                portalToTraverse = portal; // Assigner le portail a traverser
+                destinationArea = portal.getDestinationArea();
+                destinationCoordinates =  portal.getDestinationCoordinates();
             } else if(isViewInteractable() && state.equals(PlayerState.INTERACTING)){
                 for(Integer keyID : keysID){
                     portal.open(keyID);
@@ -103,12 +107,16 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
         other.acceptInteraction(handler, isCellInteraction);
     }
 
-    public Portal getPortalToTraverse() {
-        return portalToTraverse;
+    public String getDestinationArea(){
+        return destinationArea;
     }
-
+    public DiscreteCoordinates getDestinationCoordinates() {
+        return destinationCoordinates;
+    }
+    // Reinitialise les infos du portail apres teleportation
     public void clearPortalToTraverse() {
-        portalToTraverse = null;
+        destinationArea = null;
+        destinationCoordinates = null;
     }
 
     /**

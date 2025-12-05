@@ -44,19 +44,14 @@
          * Add all the IC Maze areas
          */
 
-        private void teleportation(Portal portal){
-            final String destinationArea = portal.getDestinationArea();
-            final DiscreteCoordinates destinationCoordinates = portal.getDestinationCoordinates();
-            if(destinationArea != null){
-                player.leaveArea(); // Quitte la current aire
+        private void teleportation(String destinationArea, DiscreteCoordinates destinationCoordinates){
+            player.leaveArea(); // Quitte la current aire
 
-                setCurrentArea(destinationArea, true); // Change l'aire courante
+            setCurrentArea(destinationArea, false); // Change l'aire courante
 
-                player.enterArea(getCurrentArea(), destinationCoordinates); // Teleporte le personnage dans l'aire
+            player.enterArea(getCurrentArea() , destinationCoordinates);// Teleporte le personnage dans l'aire
 
-                player.centerCamera(); // Centre la camera sur le personnage
-
-            }
+            player.centerCamera(); // Centre la camera sur le personnage
         }
 
         private void createAreas() {
@@ -91,11 +86,13 @@
         public void update(float deltaTime) {
             super.update(deltaTime);
 
+            // Variable s'initialise a l'interaction
+            String destinationArea = player.getDestinationArea();
+            DiscreteCoordinates destinationCoordinates = player.getDestinationCoordinates();
 
-            // Teleporte le player si interaction avec un portail ouvert
-            Portal portal = player.getPortalToTraverse();
-            if (player != null && portal != null) {
-                teleportation(portal);
+            // Teleporte le player si interaction
+            if (destinationCoordinates != null && destinationArea != null) {
+                teleportation(destinationArea, destinationCoordinates);
                 player.clearPortalToTraverse();
             }
 
