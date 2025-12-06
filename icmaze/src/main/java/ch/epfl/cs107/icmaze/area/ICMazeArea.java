@@ -1,21 +1,17 @@
 package ch.epfl.cs107.icmaze.area;
 
 import ch.epfl.cs107.icmaze.actor.Portal;
+import ch.epfl.cs107.play.areagame.AreaGraph;
 import ch.epfl.cs107.play.areagame.area.Area;
-import ch.epfl.cs107.play.engine.actor.Actor;
 import ch.epfl.cs107.play.engine.actor.Background;
-import ch.epfl.cs107.play.engine.actor.Foreground;
 import ch.epfl.cs107.play.io.FileSystem;
 import ch.epfl.cs107.play.math.DiscreteCoordinates;
 import ch.epfl.cs107.play.math.Orientation;
 import ch.epfl.cs107.play.window.Window;
 
-import java.util.HashMap;
-
 public abstract class ICMazeArea extends Area {
     private String title;
     public final static float DEFAULT_SCALE_FACTOR = 11.f;
-    private float cameraScaleFactor = DEFAULT_SCALE_FACTOR;
     private int sizeSide; // Longueur du cote de l'aire
 
     // Declaration des 4 portails
@@ -23,6 +19,9 @@ public abstract class ICMazeArea extends Area {
     private Portal portalEast;
     private Portal portalNorth;
     private Portal portalSouth;
+
+    // Mise en place de l'Area Graph
+    protected AreaGraph areaGraph = new AreaGraph();
 
     /**
      * Area specific callback to initialise the instance
@@ -69,15 +68,19 @@ public abstract class ICMazeArea extends Area {
     }
 
     public void initPortals(){
-        portalNorth  = new Portal(this ,  Orientation.UP.opposite(),new DiscreteCoordinates(sizeSide / 2 , sizeSide + 1), new DiscreteCoordinates(sizeSide / 2 , 1));
-        portalSouth  = new Portal(this ,  Orientation.DOWN.opposite(), new DiscreteCoordinates(sizeSide / 2, 0), new DiscreteCoordinates(sizeSide / 2, sizeSide));
-        portalEast = new Portal(this ,  Orientation.RIGHT.opposite(), new DiscreteCoordinates(sizeSide + 1, sizeSide / 2), new DiscreteCoordinates( 1, sizeSide / 2));
-        portalWest = new Portal(this ,  Orientation.LEFT.opposite(), new DiscreteCoordinates(0, sizeSide / 2), new DiscreteCoordinates(sizeSide, sizeSide / 2));
+        portalNorth  = new Portal(this ,  Orientation.UP.opposite(), new DiscreteCoordinates(sizeSide / 2 , sizeSide + 1));
+        portalSouth  = new Portal(this ,  Orientation.DOWN.opposite(), new DiscreteCoordinates(sizeSide / 2, 0));
+        portalEast = new Portal(this ,  Orientation.RIGHT.opposite(), new DiscreteCoordinates(sizeSide + 1, sizeSide / 2));
+        portalWest = new Portal(this ,  Orientation.LEFT.opposite(), new DiscreteCoordinates(0, sizeSide / 2));
     }
 
-    private void createArea(){
+    protected void createArea(){
         registerPortals(); // Enregistrer les portails dans l'aire
-        registerTheme();
+        registerTheme(); // Enregistrer les backgrounds
+    }
+
+    public int getSizeSide() {
+        return sizeSide;
     }
 
     public void openPortal(AreaPortals portal, String destinationAreaName) {
@@ -98,9 +101,32 @@ public abstract class ICMazeArea extends Area {
         }
     }
 
+    public void setDestinationCoordinate(AreaPortals portal, DiscreteCoordinates destinationCoordinates){
+        switch (portal) {
+            case W -> portalWest.setDestinationCoordinates(destinationCoordinates);
+            case E -> portalEast.setDestinationCoordinates(destinationCoordinates);
+            case N -> portalNorth.setDestinationCoordinates(destinationCoordinates);
+            case S -> portalSouth.setDestinationCoordinates(destinationCoordinates);
+        }
+    }
+
+
+
+    public DiscreteCoordinates getWestPortalSpawn() {
+        return new DiscreteCoordinates(sizeSide, sizeSide / 2);
+    }
+    public DiscreteCoordinates getEstPortalSpawn() {
+        return new DiscreteCoordinates(1, sizeSide / 2);
+    }
+    public DiscreteCoordinates getNorthPortalSpawn(){
+        return new DiscreteCoordinates(sizeSide/2, 1);
+    }
+    public DiscreteCoordinates getSouthPortalSpawn() {
+        return new DiscreteCoordinates(sizeSide / 2, sizeSide);
+    }
+
     private void registerTheme() {
         registerActor(new Background(this, title));
-        registerActor(new Foreground(this, null, title));
     }
 
     private void registerPortals(){
@@ -115,9 +141,7 @@ public abstract class ICMazeArea extends Area {
      * Getter for ICMazeArea's scale factor
      * @return Scale factor in both the x-direction and the y-direction
      */
-    @Override
-    public final float getCameraScaleFactor() {
-        return cameraScaleFactor;
+    public float getCameraScaleFactor(){
+        return (float) Math.min(sizeSide * 1.375f, 30);
     }
-
 }

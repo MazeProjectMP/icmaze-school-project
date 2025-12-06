@@ -23,7 +23,6 @@ public class Spawn extends ICMazeArea {
         return new DiscreteCoordinates(5, 7);
     }
 
-
     @Override
     public String getTitle() {
         return "icmaze/Spawn";
