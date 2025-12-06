@@ -1,17 +1,13 @@
 package ch.epfl.cs107.icmaze.area;
 
-import ch.epfl.cs107.icmaze.MazeGenerator;
 import ch.epfl.cs107.icmaze.actor.Portal;
+import ch.epfl.cs107.play.areagame.AreaGraph;
 import ch.epfl.cs107.play.areagame.area.Area;
-import ch.epfl.cs107.play.engine.actor.Actor;
 import ch.epfl.cs107.play.engine.actor.Background;
-import ch.epfl.cs107.play.engine.actor.Foreground;
 import ch.epfl.cs107.play.io.FileSystem;
 import ch.epfl.cs107.play.math.DiscreteCoordinates;
 import ch.epfl.cs107.play.math.Orientation;
 import ch.epfl.cs107.play.window.Window;
-
-import java.util.HashMap;
 
 public abstract class ICMazeArea extends Area {
     private String title;
@@ -23,6 +19,9 @@ public abstract class ICMazeArea extends Area {
     private Portal portalEast;
     private Portal portalNorth;
     private Portal portalSouth;
+
+    // Mise en place de l'Area Graph
+    protected AreaGraph areaGraph = new AreaGraph();
 
     /**
      * Area specific callback to initialise the instance
@@ -77,7 +76,7 @@ public abstract class ICMazeArea extends Area {
 
     protected void createArea(){
         registerPortals(); // Enregistrer les portails dans l'aire
-        registerTheme();
+        registerTheme(); // Enregistrer les backgrounds
     }
 
     public int getSizeSide() {

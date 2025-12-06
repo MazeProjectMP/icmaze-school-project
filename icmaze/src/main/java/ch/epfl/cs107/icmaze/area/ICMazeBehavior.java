@@ -30,7 +30,11 @@ public class ICMazeBehavior extends AreaBehavior {
         //https://stackoverflow.com/questions/25761438/understanding-bufferedimage-getrgb-output-values
         NULL(0, false),
         GROUND(-16777216, true),
-        // GROUND2(type: )
+        GROUND2( -14113468, false),
+        GROUND3(-14179260, false),
+        GROUND4(-14180030, false),
+        GROUND5(-14113211, false),
+        GROUND6(-14113212, false),
         WALL(-14112955, false),
         HOLE(-65536, true);
 

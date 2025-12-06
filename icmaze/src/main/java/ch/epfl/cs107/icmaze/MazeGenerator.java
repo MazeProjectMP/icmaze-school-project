@@ -1,9 +1,7 @@
 package ch.epfl.cs107.icmaze;
 
-import java.util.Arrays;
 import java.util.Random;
 
-import ch.epfl.cs107.play.areagame.area.Area;
 import ch.epfl.cs107.play.math.DiscreteCoordinates;
 
 /**
@@ -57,7 +55,7 @@ public final class MazeGenerator {
             // Dessine le mur horizontal
             for (int i = x; i < x + width; i++) {
                 if (i != passageHorizontal){
-                    maze[wallHorizontal][i] = WALL; // Mettre un mur hors ouverture
+                    maze[wallHorizontal][i] = WALL; // Mettre un mur
                 }else{
                     maze[wallHorizontal][i] = 0; // Passage
                 }
@@ -74,7 +72,7 @@ public final class MazeGenerator {
             // Dessine le mur vertical
             for (int i = y; i < y + height; i++) {
                 if (i != passageVertical){
-                    maze[i][wallVertical] = WALL; // Mettre un mur hors ouverture
+                    maze[i][wallVertical] = WALL; // Mettre un mur
                 }else{
                     maze[i][wallVertical] = 0; // Passage
                 }

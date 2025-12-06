@@ -104,10 +104,12 @@ public class Portal extends AreaEntity {
         setState(PortalState.OPEN);
         setDestinationArea(destinationAreaName);
     }
-    public void open(int identificator) {
+    public boolean open(int identificator) {
         if  (this.identificator == identificator) {
             setState(PortalState.OPEN);
+            return true;
         }
+        return false;
     }
 
     @Override

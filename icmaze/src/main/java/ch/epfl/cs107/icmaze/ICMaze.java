@@ -114,17 +114,17 @@
             spawn.setDestinationCoordinate(ICMazeArea.AreaPortals.E, smallArea.getEstPortalSpawn());
 
             smallArea.openPortal(ICMazeArea.AreaPortals.W, spawn.getTitle());
-            smallArea.openPortal(ICMazeArea.AreaPortals.E, mediumArea.getTitle());
+            smallArea.lockPortalWithKey(ICMazeArea.AreaPortals.E, smallArea.getKeyID(),mediumArea.getTitle());
             smallArea.setDestinationCoordinate(ICMazeArea.AreaPortals.W, spawn.getWestPortalSpawn());
             smallArea.setDestinationCoordinate(ICMazeArea.AreaPortals.E, mediumArea.getEstPortalSpawn());
 
             mediumArea.openPortal(ICMazeArea.AreaPortals.W, smallArea.getTitle());
-            mediumArea.openPortal(ICMazeArea.AreaPortals.E, largeArea.getTitle());
+            mediumArea.lockPortalWithKey(ICMazeArea.AreaPortals.E, mediumArea.getKeyID(), largeArea.getTitle());
             mediumArea.setDestinationCoordinate(ICMazeArea.AreaPortals.W, smallArea.getWestPortalSpawn());
             mediumArea.setDestinationCoordinate(ICMazeArea.AreaPortals.E, largeArea.getEstPortalSpawn());
 
             largeArea.openPortal(ICMazeArea.AreaPortals.W, mediumArea.getTitle());
-            largeArea.openPortal(ICMazeArea.AreaPortals.E, bossArea.getTitle());
+            largeArea.lockPortalWithKey(ICMazeArea.AreaPortals.E,  largeArea.getKeyID(), bossArea.getTitle());
             largeArea.setDestinationCoordinate(ICMazeArea.AreaPortals.W, mediumArea.getWestPortalSpawn());
             largeArea.setDestinationCoordinate(ICMazeArea.AreaPortals.E, bossArea.getEstPortalSpawn());
 

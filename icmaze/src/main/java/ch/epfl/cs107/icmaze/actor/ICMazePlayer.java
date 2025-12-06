@@ -63,7 +63,6 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
         IDLE, // Le personnage est au repos
         MOVING, // Le personnage bouge
         INTERACTING, // Le personnage demande une interaction
-
     }
 
     private class ICMazePlayerInteractionHandler implements ICMazeInteractionVisitor {
@@ -94,8 +93,10 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
                 destinationArea = portal.getDestinationArea();
                 destinationCoordinates =  portal.getDestinationCoordinates();
             } else if(isViewInteractable() && state.equals(PlayerState.INTERACTING)){
-                for(Integer keyID : keysID){
-                    portal.open(keyID);
+                for(int i = 0; i < keysID.size(); i++){
+                    if(portal.open(keysID.get(i))){
+                        keysID.remove(i); // Enleve la cle si utilisee
+                    }
                 }
             }
         }
