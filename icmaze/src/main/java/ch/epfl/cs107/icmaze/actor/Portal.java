@@ -89,6 +89,7 @@ public class Portal extends AreaEntity {
         LOCKED,
         INVISIBLE,
     }
+
     public void setState(PortalState state) {
         this.state = state;
     }

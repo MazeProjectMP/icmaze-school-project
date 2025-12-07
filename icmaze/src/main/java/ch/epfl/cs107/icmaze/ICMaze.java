@@ -6,6 +6,8 @@
     import ch.epfl.cs107.icmaze.actor.collectable.Heart;
     import ch.epfl.cs107.icmaze.actor.collectable.Key;
     import ch.epfl.cs107.icmaze.actor.collectable.Pickaxe;
+    import ch.epfl.cs107.icmaze.actor.enemies.Enemy;
+    import ch.epfl.cs107.icmaze.actor.enemies.LogMonster;
     import ch.epfl.cs107.icmaze.area.ICMazeArea;
     import ch.epfl.cs107.icmaze.area.maps.*;
     import ch.epfl.cs107.play.areagame.AreaGame;
@@ -157,7 +159,7 @@
             ICMazeArea area = (ICMazeArea) setCurrentArea(areaKey, true);
 
             // Inititalise le main character
-            player = new ICMazePlayer(area, Orientation.UP, initialPostion, "player");
+            player = new ICMazePlayer(area, Orientation.UP, initialPostion, "player", 5);
             player.enterArea(area, initialPostion);
             player.centerCamera();
 
@@ -175,11 +177,13 @@
             area.registerActor(key1);
             area.registerActor(key2);
 
+            LogMonster logMonster = new LogMonster(getCurrentArea(), Orientation.LEFT, new DiscreteCoordinates(2,5), 5, LogMonster.State.TARGETING);
+            area.registerActor(logMonster);
             // Initialise le rocher
-            rock = new Rock(area, rockPosition);
-            area.registerActor(rock);
-            area.registerActor(new Rock(area, new DiscreteCoordinates(3,4)));
-            area.registerActor(new Rock(area, new DiscreteCoordinates(3,5)));
+//            rock = new Rock(area, rockPosition);
+//            area.registerActor(rock);
+//            area.registerActor(new Rock(area, new DiscreteCoordinates(3,4)));
+//            area.registerActor(new Rock(area, new DiscreteCoordinates(3,5)));
             area.registerActor(new Rock(area, new DiscreteCoordinates(3,6)));
 
 

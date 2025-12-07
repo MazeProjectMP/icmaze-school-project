@@ -4,6 +4,7 @@ import ch.epfl.cs107.icmaze.KeyBindings;
 import ch.epfl.cs107.icmaze.actor.collectable.Heart;
 import ch.epfl.cs107.icmaze.actor.collectable.Key;
 import ch.epfl.cs107.icmaze.actor.collectable.Pickaxe;
+import ch.epfl.cs107.icmaze.actor.enemies.Enemy;
 import ch.epfl.cs107.icmaze.handler.ICMazeInteractionVisitor;
 import ch.epfl.cs107.play.areagame.actor.Interactable;
 import ch.epfl.cs107.play.areagame.actor.Interactor;
@@ -44,8 +45,26 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
 
     // Info du portail a traverser
     private String destinationArea;
-
     private DiscreteCoordinates destinationCoordinates;
+
+    // Points de vies
+    private final int maxHP;
+    private int currentHP;
+
+    // Pickaxe
+    private boolean hasPickaxe = false;
+    private boolean isRock = false;
+    private boolean hasAttacked = false;
+
+    // Pickaxe Animation
+    private final Vector pickaxeAnchor = new Vector(-0.5f, 0);
+    private final Orientation[] pickaxeOrders = {DOWN, UP, RIGHT, LEFT};
+    private final static int PICKAXE_ANIMATION_DURATION = 5;
+    private OrientedAnimation pickaxeAnimation =
+            new OrientedAnimation(prefix + ".pickaxe",
+                    PICKAXE_ANIMATION_DURATION, this, pickaxeAnchor, pickaxeOrders, 4, 2, 2, 32, 32);
+    private OrientedAnimation currentAnimation;
+
 
     /**
      * @param owner (Area) area to which the player belong
@@ -53,9 +72,15 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
      * @param coordinates (DiscreteCoordinates) the initial position in the grid
      * @param spriteName (String) name of the sprite used as graphical representation
      */
-    public ICMazePlayer(Area owner, Orientation orientation, DiscreteCoordinates coordinates, String spriteName) {
+    public ICMazePlayer(Area owner, Orientation orientation, DiscreteCoordinates coordinates, String spriteName, int maxHP) {
         super(owner, orientation, coordinates);
+        this.maxHP = maxHP;
+        currentHP = maxHP;
         resetMotion();
+    }
+
+    public void loseHP(int degat) {
+        currentHP -= degat;
     }
 
     // Differents etats du personnage
@@ -63,6 +88,7 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
         IDLE, // Le personnage est au repos
         MOVING, // Le personnage bouge
         INTERACTING, // Le personnage demande une interaction
+        ATTACKING_WITH_PICKAXE, // Le personnage attaque avec la pioche
     }
 
     private class ICMazePlayerInteractionHandler implements ICMazeInteractionVisitor {
@@ -75,6 +101,7 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
         @Override
         public void interactWith(Pickaxe pickaxe,boolean isCellInteraction){
             if(isCellInteraction){
+                hasPickaxe = true;
                 pickaxe.hide();
             }
         }
@@ -98,6 +125,23 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
                         keysID.remove(i); // Enleve la cle si utilisee
                     }
                 }
+            }
+        }
+
+        @Override
+        public void interactWith(Rock rock, boolean isCellInteraction) {
+            isRock = !rock.isBroken();
+            if (rock.isViewInteractable() && !hasAttacked && isRock && state.equals(PlayerState.ATTACKING_WITH_PICKAXE)) {
+                hasAttacked = true;
+                rock.attackWithPickaxe();
+            }
+        }
+
+        @Override
+        public void interactWith(Enemy enemy, boolean isCellInteraction){
+            if(enemy.isViewInteractable() && !hasAttacked && !enemy.isDead() && state.equals(PlayerState.ATTACKING_WITH_PICKAXE)){
+                hasAttacked = true;
+                enemy.loseHP(1);
             }
         }
     }
@@ -125,13 +169,18 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
      */
     @Override
     public void update(float deltaTime) {
-        // Change l'etat du personnage si il ne bouge plus
-        if(!isDisplacementOccurs()){
+        super.update(deltaTime);
+        // Change l'etat du personnage si il ne bouge plus et n'attacke pas
+        if(!isDisplacementOccurs() && !state.equals(PlayerState.ATTACKING_WITH_PICKAXE)){
             state = PlayerState.IDLE;
+        }
+        if (state != PlayerState.ATTACKING_WITH_PICKAXE) {
+            hasAttacked = false;
         }
         Keyboard keyboard = getOwnerArea().getKeyboard();
         switch (state){
             case IDLE :
+                currentAnimation = playerAnimation;
                 moveIfPressed(Orientation.LEFT, keyboard.get(keys.left()));
                 moveIfPressed(Orientation.UP, keyboard.get(keys.up()));
                 moveIfPressed(Orientation.RIGHT, keyboard.get(keys.right()));
@@ -151,6 +200,11 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
                 if(keyboard.get(keys.interact()).isPressed()){
                     state = PlayerState.INTERACTING;
                 }
+
+                // Mode Attack
+                if (keyboard.get(keys.pickaxe()).isPressed()&& hasPickaxe) {
+                    state = PlayerState.ATTACKING_WITH_PICKAXE;
+                }
                 break;
             case INTERACTING:
                 // Repasse en idle
@@ -158,8 +212,19 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
                     state = PlayerState.IDLE;
                 }
                 break;
+
+            case ATTACKING_WITH_PICKAXE:
+                // Jouer l'animation de la pioche
+                currentAnimation = pickaxeAnimation;
+                pickaxeAnimation.update(deltaTime);
+
+                if (pickaxeAnimation.isCompleted() ) {
+                    state = PlayerState.IDLE;
+                    pickaxeAnimation.reset();
+                    hasAttacked = false;
+                }
+                break;
         }
-        super.update(deltaTime);
     }
 
     /**
@@ -167,8 +232,9 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
      */
     @Override
     public void draw(ch.epfl.cs107.play.window.Canvas canvas) {
-        playerAnimation.draw(canvas);
+        currentAnimation.draw(canvas);
     }
+
 
     @Override
     public boolean takeCellSpace() {
@@ -202,9 +268,9 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
 
     @Override
     public boolean wantsViewInteraction() {
-        return (state == PlayerState.INTERACTING); // Verifie l'etat
+        // Retourne true pour INTERACTING et ATTACKING_WITH_PICKAXE
+        return (state == PlayerState.INTERACTING || state == PlayerState.ATTACKING_WITH_PICKAXE);
     }
-
     @Override
     public void acceptInteraction(AreaInteractionVisitor v, boolean isCellInteraction) {
         ((ICMazeInteractionVisitor) v).interactWith(this, isCellInteraction);
