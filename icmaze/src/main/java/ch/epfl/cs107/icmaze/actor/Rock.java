@@ -1,11 +1,13 @@
 package ch.epfl.cs107.icmaze.actor;
 
+import ch.epfl.cs107.icmaze.handler.ICMazeInteractionVisitor;
 import ch.epfl.cs107.play.areagame.actor.AreaEntity;
 import ch.epfl.cs107.play.areagame.area.Area;
 import ch.epfl.cs107.play.areagame.handler.AreaInteractionVisitor;
 import ch.epfl.cs107.play.engine.actor.Sprite;
 import ch.epfl.cs107.play.math.DiscreteCoordinates;
 import ch.epfl.cs107.play.math.Orientation;
+import ch.epfl.cs107.play.math.Vector;
 import ch.epfl.cs107.play.window.Canvas;
 
 import java.util.Collections;
@@ -13,6 +15,7 @@ import java.util.List;
 
 public class Rock extends AreaEntity {
     private Sprite sprite ;
+    private boolean isBroken=false;
 
 
     public Rock(Area area, DiscreteCoordinates position) {
@@ -27,7 +30,10 @@ public class Rock extends AreaEntity {
 
     @Override
     public List<DiscreteCoordinates> getCurrentCells() {
-        return Collections.singletonList(getCurrentMainCellCoordinates());
+        DiscreteCoordinates coord = getCurrentMainCellCoordinates();
+        return List.of(coord , coord.jump(new
+                Vector((getOrientation().ordinal()+1)%2,
+                getOrientation().ordinal()%2)));
     }
 
 
@@ -43,10 +49,20 @@ public class Rock extends AreaEntity {
 
     @Override
     public boolean isViewInteractable() {
-        return false;  //on ne peut pas avoir d'interaction a distance
+        return true;  //on ne peut pas avoir d'interaction a distance
     }
 
-    @Override
-    public void acceptInteraction(AreaInteractionVisitor v, boolean isCellInteraction) {}  //n'accepte pas d'interactions par défaut
 
+    @Override
+    public void acceptInteraction(AreaInteractionVisitor v, boolean isCellInteraction) {
+        if (isCellInteraction) {
+            ((ICMazeInteractionVisitor) v).interactWith(this, true);
+        }
+    }
+
+    public void attackWithPickaxe() {
+    }
+    public boolean getIsBroken() {
+        return isBroken;
+    }
 }
