@@ -45,6 +45,7 @@ public class Play {
 				while (!window.isCloseRequested()) {
 
 					// Compute time interval
+
                     lastTime = currentTime;
                     currentTime = System.nanoTime();
 					float deltaTime = (currentTime - lastTime);

@@ -2,14 +2,17 @@ package ch.epfl.cs107.icmaze.actor.enemies;
 
 
 import ch.epfl.cs107.icmaze.RandomGenerator;
+import ch.epfl.cs107.icmaze.actor.Health;
 import ch.epfl.cs107.icmaze.actor.ICMazePlayer;
 import ch.epfl.cs107.icmaze.actor.util.Cooldown;
 import ch.epfl.cs107.icmaze.handler.ICMazeInteractionVisitor;
 import ch.epfl.cs107.play.areagame.actor.Interactable;
 import ch.epfl.cs107.play.areagame.area.Area;
+import ch.epfl.cs107.play.areagame.handler.AreaInteractionVisitor;
 import ch.epfl.cs107.play.engine.actor.OrientedAnimation;
 import ch.epfl.cs107.play.math.DiscreteCoordinates;
 import ch.epfl.cs107.play.math.Orientation;
+import ch.epfl.cs107.play.math.Transform;
 import ch.epfl.cs107.play.math.Vector;
 
 import java.util.Collections;
@@ -57,6 +60,20 @@ public class LogMonster extends PathFinderEnemy {
     private final Cooldown reorientationCooldown;
     private final Cooldown stateTransitionCooldown;
 
+    // health interaction
+    private Health health;
+    private final int MONSTER_MAX_LIFE = 3;
+    //imunite
+    private boolean isImmune  = false;
+    private float immunityTimer = 0f;
+    Cooldown immunityCooldown ;
+
+    private boolean isBroken  = false;
+    private boolean showHealth = false;
+    private final int DAMAGE_AMOUNT = 1; // Dégâts infligés au monstre
+    private int damageMonster = 0 ;
+
+
     /**
      * Default AreaEntity constructor
      *
@@ -72,6 +89,13 @@ public class LogMonster extends PathFinderEnemy {
         // Initialiser les cooldowns
         this.reorientationCooldown = new Cooldown(0.75f);
         this.stateTransitionCooldown = new Cooldown(3.0f);
+
+        health = new Health(this, Transform.I.translated(-0.5, 1.75f), MONSTER_MAX_LIFE, false);
+
+//        this.DAMAGE_AMOUNT = pointsDiminish;
+        immunityCooldown = new Cooldown(0.4f);
+        isImmune  = false;
+        showHealth = false;
     }
 
     public enum State{
@@ -98,6 +122,20 @@ public class LogMonster extends PathFinderEnemy {
 
     @Override
     public void update(float deltaTime) {
+
+        if (isImmune) {//affichage de la barre avec cooldown
+
+            if (immunityCooldown.ready(deltaTime)) {// qd le temps est ecoule retourne true
+                isImmune = false;
+            }
+        }
+        // Gestion de l'affichage de la barre de vie
+        if (showHealth) {
+            if (immunityCooldown.ready(deltaTime)) {
+                showHealth = false;
+            }
+        }
+
         super.update(deltaTime);
         // Mettre à jour l'animation
         switch(currentState) {
@@ -130,9 +168,11 @@ public class LogMonster extends PathFinderEnemy {
                 break;
         }
     }
+
     @Override
     public void draw(ch.epfl.cs107.play.window.Canvas canvas) {
-        super.draw(canvas);
+
+
         if(!isVanishing()) {
             switch (currentState) {
                 case SLEEPING:
@@ -146,10 +186,54 @@ public class LogMonster extends PathFinderEnemy {
                     break;
             }
         }
+        // Afficher la barre de vie
+        if (health.isOn() && !isBroken &&isImmune) {
+            health.draw(canvas);
+        }
+        super.draw(canvas);
     }
+    // Méthode pour prendre des dégâts
+    public void takeDamage(int damage) {
+        System.out.println("Taking damage " + damage);
+        if (!isBroken && !isImmune&& health.isOn()) {
+            //affiche barre de vie
+            showHealth = true;
+
+            isImmune = true; //active l'immunité
+
+            immunityCooldown.reset(); //reintialise le timer
+
+            health.decrease(damage);//inflige les degats
+
+            // Si le monstre meurt
+            if (health.isOff()) {
+                isBroken = true;
+                getOwnerArea().unregisterActor(this);
+
+
+            }
+        }
+    }
+    public boolean isDead() {
+        return isBroken || health.isOff();
+    }
+
 
     @Override
     public Orientation getOrientation() {
         return LEFT;
     }
+    @Override
+    public boolean isViewInteractable() {
+        return true; // Le monstre peut être attaqué à distance
+
+    }
+    @Override
+    public void acceptInteraction(AreaInteractionVisitor v, boolean isCellInteraction) {
+        ((ICMazeInteractionVisitor) v).interactWith(this, isCellInteraction);
+    }
+    public boolean takeCellSpace() {
+        return !isDead() && !isBroken ;
+    }
+
 }

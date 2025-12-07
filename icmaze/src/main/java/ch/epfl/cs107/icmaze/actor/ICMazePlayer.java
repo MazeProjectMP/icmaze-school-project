@@ -5,6 +5,7 @@ import ch.epfl.cs107.icmaze.actor.collectable.Heart;
 import ch.epfl.cs107.icmaze.actor.collectable.Key;
 import ch.epfl.cs107.icmaze.actor.collectable.Pickaxe;
 import ch.epfl.cs107.icmaze.actor.enemies.Enemy;
+import ch.epfl.cs107.icmaze.actor.enemies.LogMonster;
 import ch.epfl.cs107.icmaze.handler.ICMazeInteractionVisitor;
 import ch.epfl.cs107.play.areagame.actor.Interactable;
 import ch.epfl.cs107.play.areagame.actor.Interactor;
@@ -17,6 +18,7 @@ import ch.epfl.cs107.play.engine.actor.Sprite;
 import ch.epfl.cs107.play.engine.actor.TextGraphics;
 import ch.epfl.cs107.play.math.DiscreteCoordinates;
 import ch.epfl.cs107.play.math.Orientation;
+import ch.epfl.cs107.play.math.Transform;
 import ch.epfl.cs107.play.math.Vector;
 import ch.epfl.cs107.play.window.Button;
 import ch.epfl.cs107.play.window.Keyboard;
@@ -65,7 +67,13 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
                     PICKAXE_ANIMATION_DURATION, this, pickaxeAnchor, pickaxeOrders, 4, 2, 2, 32, 32);
     private OrientedAnimation currentAnimation;
 
-
+    // health interaction
+    private Health health;
+    private final int MAX_LIFE = 3;
+    private float immunityTimer = 0f;
+    private final float IMMUNITY_DURATION = 1.5f; // 2 secondes
+    private boolean isImmune = false;
+    private LogMonster logMonster;
     /**
      * @param owner (Area) area to which the player belong
      * @param orientation (Orientation) the initial orientation of the player
@@ -77,6 +85,8 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
         this.maxHP = maxHP;
         currentHP = maxHP;
         resetMotion();
+        health = new Health(this, Transform.I.translated(-0.5, 1.75f), MAX_LIFE, true);
+
     }
 
     public void loseHP(int degat) {
@@ -95,6 +105,7 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
         @Override
         public void interactWith(Heart heart, boolean isCellInteraction){
             if(isCellInteraction){
+                health.increase(1); // Gagner 1 point de vie
                 heart.hide();
             }
         }
@@ -133,7 +144,23 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
             isRock = !rock.isBroken();
             if (rock.isViewInteractable() && !hasAttacked && isRock && state.equals(PlayerState.ATTACKING_WITH_PICKAXE)) {
                 hasAttacked = true;
-                rock.attackWithPickaxe();
+//               rock.attackWithPickaxe();
+                rock.takeDamage(1);
+
+            }
+        }
+        public void interactWith(LogMonster monster, boolean isCellInteraction) {
+            // Si collision avec le monstre (interaction de cellule)
+            if (isCellInteraction) {
+                if (!monster.isDead()) {
+
+                    takeDamage(1); // Le player prend 1 dégât
+            }}
+
+            // Si attaque avec pioche (interaction de vue)
+            if(monster.isViewInteractable() && !hasAttacked && !monster.isDead() && state.equals(PlayerState.ATTACKING_WITH_PICKAXE)){
+                hasAttacked = true;
+                monster.takeDamage(1); // Le monstre prend 1 dégât
             }
         }
 
@@ -170,6 +197,13 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
     @Override
     public void update(float deltaTime) {
         super.update(deltaTime);
+        // Gere l'immunite
+        if (isImmune) {
+            immunityTimer -= deltaTime;
+            if (immunityTimer <= 0) {
+                isImmune = false;
+            }
+        }
         // Change l'etat du personnage si il ne bouge plus et n'attacke pas
         if(!isDisplacementOccurs() && !state.equals(PlayerState.ATTACKING_WITH_PICKAXE)){
             state = PlayerState.IDLE;
@@ -225,6 +259,16 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
                 }
                 break;
         }
+
+    }
+    public void takeDamage(int damage) {
+        if (!isImmune && health.isOn()) {
+            health.decrease(damage);
+            isImmune = true;
+            immunityTimer = IMMUNITY_DURATION;
+
+            // clignotement AAAA
+        }
     }
 
     /**
@@ -232,7 +276,18 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
      */
     @Override
     public void draw(ch.epfl.cs107.play.window.Canvas canvas) {
-        currentAnimation.draw(canvas);
+// Gestion du clignotement pendant l'immunité
+        if (isImmune) {
+            // Affiche seulement quand le compteur est pair (clignotement)
+            long currentTime = System.currentTimeMillis();
+            if ((currentTime / 250) % 2 == 0) { // 250ms = 4 fois par seconde
+                currentAnimation.draw(canvas);
+            }
+        } else {
+            currentAnimation.draw(canvas);
+        }
+        health.draw(canvas); // Dessiner la barre de vie
+
     }
 
 
