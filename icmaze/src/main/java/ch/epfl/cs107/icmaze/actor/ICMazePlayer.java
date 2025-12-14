@@ -4,6 +4,8 @@ import ch.epfl.cs107.icmaze.KeyBindings;
 import ch.epfl.cs107.icmaze.actor.collectable.Heart;
 import ch.epfl.cs107.icmaze.actor.collectable.Key;
 import ch.epfl.cs107.icmaze.actor.collectable.Pickaxe;
+import ch.epfl.cs107.icmaze.actor.util.LogMonster;
+import ch.epfl.cs107.icmaze.area.ICMazeArea;
 import ch.epfl.cs107.icmaze.handler.ICMazeInteractionVisitor;
 import ch.epfl.cs107.play.areagame.actor.Interactable;
 import ch.epfl.cs107.play.areagame.actor.Interactor;
@@ -16,6 +18,7 @@ import ch.epfl.cs107.play.engine.actor.Sprite;
 import ch.epfl.cs107.play.engine.actor.TextGraphics;
 import ch.epfl.cs107.play.math.DiscreteCoordinates;
 import ch.epfl.cs107.play.math.Orientation;
+import ch.epfl.cs107.play.math.Transform;
 import ch.epfl.cs107.play.math.Vector;
 import ch.epfl.cs107.play.window.Button;
 import ch.epfl.cs107.play.window.Keyboard;
@@ -44,12 +47,18 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
 
     // Info du portail a traverser
     private String destinationArea;
-
     private DiscreteCoordinates destinationCoordinates;
+
     //pickaxe interaction
     private boolean isRock = false;
     private boolean hasPickaxe ;
 
+    // health interaction
+    private Health health;
+    private final int MAX_LIFE = 3;
+    private float immunityTimer = 0f;
+    private final float IMMUNITY_DURATION = 1.5f; // 2 secondes
+    private boolean isImmune = false;
     // animation pioche
     private final Vector pickaxeAnchor = new Vector(-0.5f, 0);
     private final Orientation[] pickaxeOrders = {DOWN, UP, RIGHT, LEFT};
@@ -59,7 +68,7 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
                     PICKAXE_ANIMATION_DURATION, this, pickaxeAnchor, pickaxeOrders, 4, 2, 2, 32, 32);
     private OrientedAnimation currentAnimation;
 
-
+    private boolean hasAttacked = false;
     /**
      * @param owner (Area) area to which the player belong
      * @param orientation (Orientation) the initial orientation of the player
@@ -69,6 +78,8 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
     public ICMazePlayer(Area owner, Orientation orientation, DiscreteCoordinates coordinates, String spriteName) {
         super(owner, orientation, coordinates);
         resetMotion();
+        health = new Health(this, Transform.I.translated(-0.5, 1.75f), MAX_LIFE, true);
+
     }
 
     // Differents etats du personnage
@@ -83,6 +94,7 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
         @Override
         public void interactWith(Heart heart, boolean isCellInteraction){
             if(isCellInteraction){
+                health.increase(1); // Gagner 1 point de vie
                 heart.hide();
             }
         }
@@ -103,17 +115,22 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
         }
         @Override
         public void interactWith(Rock rock, boolean isCellInteraction) {
-            System.out.println("in interact ");
-            if (isCellInteraction) {
-                System.out.println("in interact with");
-
-            }
-            else if (isViewInteractable()&& state.equals(PlayerState.ATTACKING_WITH_PICKAXE)) {
-                isRock = !rock.getIsBroken() ;
-                System.out.println(isRock);
-                if(isRock && state.equals(PlayerState.ATTACKING_WITH_PICKAXE)){
-                    rock.attackWithPickaxe();
+              isRock = !rock.isBroken();
+                if (rock.isViewInteractable() && !hasAttacked && isRock && state.equals(PlayerState.ATTACKING_WITH_PICKAXE)) {
+                    hasAttacked = true;
+                    rock.takeDamage(1);
                 }
+
+        }
+        public void interactWith(LogMonster monster, boolean isCellInteraction) {
+            // Si collision avec le monstre (interaction de cellule)
+            if (isCellInteraction) {
+                takeDamage(1); // Le joueur prend 1 dégât
+            }
+
+            // Si attaque avec pioche (interaction de vue)
+            if (!isCellInteraction && state == PlayerState.ATTACKING_WITH_PICKAXE) {
+                monster.takeDamage(1); // Le monstre prend 1 dégât
             }
         }
 
@@ -149,12 +166,30 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
         destinationArea = null;
         destinationCoordinates = null;
     }
+    public void takeDamage(int damage) {
+        if (!isImmune && health.isOn()) {
+            health.decrease(damage);
+            isImmune = true;
+            immunityTimer = IMMUNITY_DURATION;
 
+            // clignotement AAAA
+        }
+    }
     /**
      * @param deltaTime elapsed time since last update, in seconds, non-negative
      */
     @Override
     public void update(float deltaTime) {
+        /**
+         * @param deltaTime elapsed time since last update, in seconds, non-negative
+         */
+         // Gere l'immunite
+         if (isImmune) {
+             immunityTimer -= deltaTime;
+             if (immunityTimer <= 0) {
+                 isImmune = false;
+             }
+         }
         // Change l'etat du personnage si il ne bouge plus
         if(!isDisplacementOccurs() && !state.equals(PlayerState.ATTACKING_WITH_PICKAXE)){
             state = PlayerState.IDLE;
@@ -182,6 +217,7 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
                 // Mode interaction
                 if(keyboard.get(keys.interact()).isPressed()){
                     state = PlayerState.INTERACTING;
+                    hasAttacked = false;
                 }
 
                 // Casser un mur
@@ -206,6 +242,7 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
                 if (pickaxeAnimation.isCompleted() ) {
                     state = PlayerState.IDLE;
                     pickaxeAnimation.reset();
+                    hasAttacked = false;
                 }
                 break;
 
@@ -218,8 +255,8 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
      */
     @Override
     public void draw(ch.epfl.cs107.play.window.Canvas canvas) {
-
-       currentAnimation.draw(canvas);
+        currentAnimation.draw(canvas);
+        health.draw(canvas); // Dessiner la barre de vie
     }
 
     @Override
@@ -254,7 +291,13 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
 
     @Override
     public boolean wantsViewInteraction() {
-        return (state == PlayerState.INTERACTING); // Verifie l'etat
+        switch (state) {
+            case INTERACTING:
+                return true;
+            case ATTACKING_WITH_PICKAXE:
+                 return true;
+        }
+        return false;
     }
 
     @Override

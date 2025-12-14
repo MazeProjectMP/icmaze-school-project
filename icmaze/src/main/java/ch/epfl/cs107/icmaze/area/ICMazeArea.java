@@ -23,6 +23,8 @@ public abstract class ICMazeArea extends Area {
     // Mise en place de l'Area Graph
     protected AreaGraph areaGraph = new AreaGraph();
 
+
+
     /**
      * Area specific callback to initialise the instance
      */

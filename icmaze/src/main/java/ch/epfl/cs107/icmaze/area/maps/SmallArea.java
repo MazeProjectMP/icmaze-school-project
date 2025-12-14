@@ -10,4 +10,5 @@ public class SmallArea extends MazeLevels {
     public SmallArea(AreaPortals areaPortalEntry, AreaPortals areaPortalExit, int keyID){
         super(areaPortalEntry, areaPortalExit, Difficulty.HARDEST, keyID, "SmallArea", side);
     }
+
 }

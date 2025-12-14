@@ -6,6 +6,7 @@ import ch.epfl.cs107.icmaze.actor.Rock;
 import ch.epfl.cs107.icmaze.actor.collectable.Heart;
 import ch.epfl.cs107.icmaze.actor.collectable.Key;
 import ch.epfl.cs107.icmaze.actor.collectable.Pickaxe;
+import ch.epfl.cs107.icmaze.actor.util.LogMonster;
 import ch.epfl.cs107.icmaze.area.ICMazeBehavior.ICMazeCell;
 import ch.epfl.cs107.play.areagame.handler.AreaInteractionVisitor;
 import ch.epfl.cs107.play.engine.actor.Sprite;
@@ -23,4 +24,5 @@ public interface ICMazeInteractionVisitor extends AreaInteractionVisitor {
     default void interactWith(Key key, boolean isCellInteraction){}
     default void interactWith(Portal portal, boolean isCellInteraction){}
     default void interactWith(Rock rock , boolean isCellInteraction){}
+    default void interactWith(LogMonster monster, boolean isCellInteraction){}
 }
