@@ -7,7 +7,7 @@ import ch.epfl.cs107.play.math.DiscreteCoordinates;
 
 public class SmallArea extends MazeLevels {
     private static final int side = 8;
-    public SmallArea(AreaPortals areaPortalEntry, AreaPortals areaPortalExit, int keyID){
-        super(areaPortalEntry, areaPortalExit, Difficulty.HARDEST, keyID, "SmallArea", side);
+    public SmallArea(AreaPortals areaPortalEntry, AreaPortals areaPortalExit, int keyID, int difficulty){
+        super(areaPortalEntry, areaPortalExit, difficulty, keyID, "SmallArea", side);
     }
 }

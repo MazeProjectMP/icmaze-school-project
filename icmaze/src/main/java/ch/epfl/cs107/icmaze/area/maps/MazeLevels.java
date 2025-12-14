@@ -4,9 +4,11 @@ import ch.epfl.cs107.icmaze.MazeGenerator;
 import ch.epfl.cs107.icmaze.RandomGenerator;
 import ch.epfl.cs107.icmaze.actor.Rock;
 import ch.epfl.cs107.icmaze.actor.collectable.Key;
+import ch.epfl.cs107.icmaze.actor.enemies.LogMonster;
 import ch.epfl.cs107.icmaze.area.ICMazeArea;
 import ch.epfl.cs107.play.engine.actor.Actor;
 import ch.epfl.cs107.play.math.DiscreteCoordinates;
+import ch.epfl.cs107.play.math.Orientation;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,11 +18,13 @@ public class MazeLevels extends ICMazeArea {
     private AreaPortals areaPortalEntry;
     private AreaPortals areaPortalExit;
     private int difficulty;
+    private static final int MAX_NB_LOGMONSTER = 3;
 
     private int keyID;
 
     private final String mapName;
 
+    private Key key;
     public MazeLevels(AreaPortals areaPortalEntry, AreaPortals areaPortalExit, int difficulty, int keyID, String mapName, int sizeSide) {
         super(mapName, sizeSide);
 
@@ -35,8 +39,53 @@ public class MazeLevels extends ICMazeArea {
     public void createArea() {
         super.createArea();
         generateMaze(); // Generation de maze
-        Key key = new Key(this, randomSpawnPosition(), Integer.MAX_VALUE);
+
+        // Ajoute la cle
+        key = new Key(this, randomSpawnPosition(), this.keyID);
         registerActor(key);
+        // Cree les monstres
+        createMonsters();
+    }
+
+    private void createMonsters(){
+        double diffRatio = Math.min(1.0, (double) Difficulty.HARDEST / difficulty);
+        double addProbability = 0.25 + 0.60 * diffRatio; // Probabilite d'ajout
+
+        for (int i = 0; i < MAX_NB_LOGMONSTER; i++) {
+                if (RandomGenerator.rng.nextDouble() < addProbability) {
+                    // Etat initial
+                    LogMonster.State initialState = determineLogMonsterInitialState(diffRatio);
+
+                    // Orientation initiale
+                    Orientation initialOrientation = Orientation.values()[RandomGenerator.nextInt(4)];
+
+                    // Position initiale
+                    DiscreteCoordinates initialPosition = randomSpawnPosition();
+
+                    // Niveau de vie maximal
+                    int maxHP = 3;
+
+                    LogMonster logMonster = new LogMonster(this, initialOrientation, initialPosition, maxHP, initialState, areaGraph, difficulty);
+                    this.registerActor(logMonster);
+                }
+            }
+    }
+
+    // Determine l'Etat initiale du logMonster
+    private LogMonster.State determineLogMonsterInitialState(double diffRatio) {
+        double pTarget = 0.10 + 0.70 * diffRatio;
+        double pRandom = 0.20;
+        double pSleeping = 1.0 - (pTarget + pRandom);
+
+        double r = RandomGenerator.rng.nextDouble();
+
+        if (r < pSleeping) {
+            return LogMonster.State.SLEEPING; // Etat dormant
+        } else if (r < pSleeping + pRandom) {
+            return LogMonster.State.MOVING; // Etat de deplacement aleatoire
+        } else {
+            return LogMonster.State.TARGETING; // Etat de chasse
+        }
     }
 
     private boolean notInSpawn(int x, int y) {
@@ -49,7 +98,19 @@ public class MazeLevels extends ICMazeArea {
         }
         return true;
     }
-    public void generateMaze(){
+
+    public void addWalkableCellToGraph(DiscreteCoordinates c) {
+        // voisins déjà "walkable" = ceux qui existent dans le graph
+        boolean left  = areaGraph.nodeExists(new DiscreteCoordinates(c.x - 1, c.y));
+        boolean up    = areaGraph.nodeExists(new DiscreteCoordinates(c.x, c.y + 1));
+        boolean right = areaGraph.nodeExists(new DiscreteCoordinates(c.x + 1, c.y));
+        boolean down  = areaGraph.nodeExists(new DiscreteCoordinates(c.x, c.y - 1));
+
+        areaGraph.addNode(c, left, up, right, down);
+    }
+
+
+    private void generateMaze(){
         int size = getSizeSide();
         int[][] maze = MazeGenerator.createMaze(size, size, Difficulty.HARDEST);
         boolean[][] chemins = new boolean[size + 2][size + 2]; // +2 pour les bords
@@ -89,7 +150,7 @@ public class MazeLevels extends ICMazeArea {
     }
 
     private DiscreteCoordinates randomSpawnPosition(){
-        List<DiscreteCoordinates> possiblePositions = new ArrayList<>(areaGraph.keySet());  // Copie (copie profonde    ) les differentes possitions possibles
+        List<DiscreteCoordinates> possiblePositions = new ArrayList<>(areaGraph.keySet());  // Copie profonde des differentes possitions possibles
 
         if (!possiblePositions.isEmpty()) {
             Collections.shuffle(possiblePositions, RandomGenerator.rng);

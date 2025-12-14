@@ -60,16 +60,16 @@ public final class MazeGenerator {
                     maze[wallHorizontal][i] = 0; // Passage
                 }
             }
+            /** recursion of division */
 
-            // Reccursion de la division
             divide(maze, x, y, width, wallHorizontal - y, difficulty);
             divide(maze, x, wallHorizontal + 1, width, y + height - wallHorizontal - 1, difficulty);
         }
         else {
-            int wallVertical = x + 1 + 2 * random.nextInt((width - 1) / 2); // Position impair du mur
-            int passageVertical = y + 2 * random.nextInt(height / 2); // Position pair
+            int wallVertical = x + 1 + 2 * random.nextInt((width - 1) / 2);
+            int passageVertical = y + 2 * random.nextInt(height / 2);
 
-            // Dessine le mur vertical
+
             for (int i = y; i < y + height; i++) {
                 if (i != passageVertical){
                     maze[i][wallVertical] = WALL; // Mettre un mur
@@ -78,7 +78,6 @@ public final class MazeGenerator {
                 }
             }
 
-            // Reccursion de la division
             divide(maze, x, y, wallVertical - x, height, difficulty);
             divide(maze, wallVertical + 1, y, x + width - wallVertical - 1, height, difficulty);
         }
@@ -91,14 +90,15 @@ public final class MazeGenerator {
         int height = grid.length;
         int width = grid[0].length;
 
-        // Print top border
+        /** print top border */
+
         System.out.print("┌");
         for (int i = 0; i < width; i++) {
             System.out.print("───");
         }
         System.out.println("┐");
 
-        // Print maze rows
+        /** print maze rows */
         for (int y = 0; y < height; y++) {
             System.out.print("│");
             for (int x = 0; x < width; x++) {
@@ -109,7 +109,8 @@ public final class MazeGenerator {
             System.out.println("│");
         }
 
-        // Print bottom border
+        /** print bottom border */
+
         System.out.print("└");
         for (int i = 0; i < width; i++) {
             System.out.print("───");

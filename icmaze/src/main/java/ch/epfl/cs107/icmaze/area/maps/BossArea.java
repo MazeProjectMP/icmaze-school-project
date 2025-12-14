@@ -1,9 +1,12 @@
 package ch.epfl.cs107.icmaze.area.maps;
 
+import ch.epfl.cs107.icmaze.actor.collectable.Key;
+import ch.epfl.cs107.icmaze.actor.enemies.Boss;
 import ch.epfl.cs107.icmaze.area.ICMazeArea;
 import ch.epfl.cs107.play.engine.actor.Background;
 import ch.epfl.cs107.play.engine.actor.Foreground;
 import ch.epfl.cs107.play.math.DiscreteCoordinates;
+import ch.epfl.cs107.play.math.Orientation;
 
 public class BossArea extends ICMazeArea {
     private static final String name = "SmallArea";
@@ -14,21 +17,19 @@ public class BossArea extends ICMazeArea {
     public BossArea(){
         super(name, sideSize);
     }
+
+    @Override
+    public void createArea() {
+        super.createArea();
+
+        // Ajoute le Boss
+        Boss boss = new Boss(this, Orientation.LEFT, new DiscreteCoordinates(5,5), 10);
+        registerActor(boss);
+    }
+
     /**
      * @return the player's spawn position in the area
      */
-//    public DiscreteCoordinates getWestPortalSpawn() {
-//        return new DiscreteCoordinates(sideSize + 1, sideSize / 2);
-//    }
-//    public DiscreteCoordinates getEstPortalSpawn() {
-//        return new DiscreteCoordinates(0, sideSize / 2);
-//    }
-//    public DiscreteCoordinates getNorthPortalSpawn(){
-//        return new DiscreteCoordinates(sideSize/2, 0);
-//    }
-//    public DiscreteCoordinates getSouthPortalSpawn(){
-//        return new DiscreteCoordinates(sideSize/2, sideSize + 1);
-//    }
     @Override
     public DiscreteCoordinates getPlayerSpawnPosition() {
         return new DiscreteCoordinates(0, 0);

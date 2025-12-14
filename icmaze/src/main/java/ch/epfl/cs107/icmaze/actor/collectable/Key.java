@@ -9,56 +9,109 @@ import ch.epfl.cs107.play.engine.actor.Sprite;
 import ch.epfl.cs107.play.math.DiscreteCoordinates;
 import ch.epfl.cs107.play.math.Orientation;
 import ch.epfl.cs107.play.window.Canvas;
+
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Represents a collectible key in the game.
+ * <p>
+ * A key is a collectable entity that can be picked up by the player
+ * and used to unlock specific elements of the maze.
+ * </p>
+ */
 public class Key extends CollectableAreaEntity implements Interactable {
-    private int identificator ;
-    private boolean isVisible = true;
+
+    private int identificator;
+
+    private boolean isVisible ;
+
     private final Sprite key;
-    public Key(Area area, DiscreteCoordinates position , int identificator) {
+
+    /**
+     * Creates a new key at the given position in the specified area.
+     * @param area (Area): the area where the key is located
+     * @param position (DiscreteCoordinates): the initial position of the key
+     * @param identificator (int): unique identifier of the key
+     */
+    public Key(Area area, DiscreteCoordinates position, int identificator) {
         super(area, Orientation.DOWN, position);
         this.identificator = identificator;
-        key = new Sprite("icmaze/key", .75f, .75f, this); // Initialise l'image de la pickaxe
+        isVisible = true;
+        key = new Sprite("icmaze/key", .75f, .75f, this);
     }
 
+    /**
+     * Gets the identifier of the key.
+     *
+     * @return (int): the key identifier
+     */
     public int getIdentificator() {
         return identificator;
     }
 
+    /**
+     * Draws the key on the canvas if it is visible.
+     * @param canvas (Canvas): the canvas to draw on
+     */
     @Override
     public void draw(Canvas canvas) {
-        if(isVisible) {
+        if (isVisible) {
             key.draw(canvas);
         }
     }
 
+    /**
+     * Accepts an interaction from an area interaction visitor.
+     * @param v (AreaInteractionVisitor): the interaction visitor
+     * @param isCellInteraction (boolean): whether the interaction is a cell interaction
+     */
     @Override
     public void acceptInteraction(AreaInteractionVisitor v, boolean isCellInteraction) {
         ((ICMazeInteractionVisitor) v).interactWith(this, isCellInteraction);
     }
 
+    /**
+     * Hides the key and removes it from the area.
+     */
     public void hide() {
         if (isVisible) {
             isVisible = false;
             getOwnerArea().unregisterActor(this);
         }
     }
+
+    /**
+     * Gets the list of cells currently occupied by the key.
+     * @return (List<DiscreteCoordinates>): a singleton list containing the main cell coordinates
+     */
     @Override
     public List<DiscreteCoordinates> getCurrentCells() {
         return Collections.singletonList(getCurrentMainCellCoordinates());
     }
 
+    /**
+     * Indicates whether the key blocks the cell it occupies.
+     * @return (boolean): {@code false}, as the key does not block movement
+     */
     @Override
     public boolean takeCellSpace() {
         return false;
     }
 
+    /**
+     * Indicates whether the key can be interacted with via cell interaction.
+     * @return (boolean): {@code true} if the key is cell-interactable
+     */
     @Override
     public boolean isCellInteractable() {
         return true;
     }
 
+    /**
+     * Indicates whether the key can be interacted with from a distance.
+     * @return (boolean): {@code false}, as the key is not view-interactable
+     */
     @Override
     public boolean isViewInteractable() {
         return false;

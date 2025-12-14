@@ -96,14 +96,14 @@ public class Health implements Graphics, Logic {
                 new Vector(0.9f, 0),
                 new Vector(0.9f, 0.15f),
                 new Vector(0.1f, 0.15f)
-        )), parent.getTransform().transformed(transform), Color.GRAY, Color.BLACK, 0.1f, 1, 0);
+        )), parent.getTransform().transformed(transform), Color.GRAY, Color.BLACK, 0.1f, 1, 12);
         // draws the green / red bar
         canvas.drawShape(new Polygon(List.of(
                 new Vector(0.1f, 0),
                 new Vector(0.8f * healthPoints / maxHealth + 0.1f, 0),
                 new Vector(0.8f*  healthPoints / maxHealth + 0.1f, 0.15f),
                 new Vector(0.1f, 0.15f)
-        )), parent.getTransform().transformed(transform), isFriendly ? Color.GREEN : Color.RED, null, 0, 0.5f, 0);
+        )), parent.getTransform().transformed(transform), isFriendly ? Color.GREEN : Color.RED, null, 0, 0.5f, 12);
 
     }
 

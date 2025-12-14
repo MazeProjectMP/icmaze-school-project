@@ -62,7 +62,17 @@
         }
 
         private void createAreas() {
-            generateHardCodedLevel();
+//            generateHardCodedLevel();
+            ICMazeArea[] generatedAreas = LevelGenerator.generateLine(this, 2); // 3 aires labyrinthiques
+
+            // Ajouter toutes les aires au jeu
+            for (ICMazeArea area : generatedAreas) {
+                addArea(area);
+            }
+
+            // Garder les références pour l'initialisation
+            spawn = (Spawn) generatedAreas[0];
+            bossArea = (BossArea) generatedAreas[generatedAreas.length - 1];
         }
 
         /**
@@ -104,42 +114,47 @@
                 end();
                 begin(getWindow(), getFileSystem());
             }
+
+            if(player.isDead()){
+                end();
+                begin(getWindow(), getFileSystem());
+            }
         }
-        private void generateHardCodedLevel() {
-
-            // Création des aires
-            SmallArea smallArea = new SmallArea(ICMazeArea.AreaPortals.E,ICMazeArea.AreaPortals.W, Integer.MAX_VALUE);
-            MediumArea mediumArea = new MediumArea(ICMazeArea.AreaPortals.E,ICMazeArea.AreaPortals.W, Integer.MAX_VALUE);
-            LargeArea largeArea = new LargeArea(ICMazeArea.AreaPortals.E,ICMazeArea.AreaPortals.W, Integer.MAX_VALUE);
-
-            spawn.lockPortalWithKey(ICMazeArea.AreaPortals.E, Integer.MAX_VALUE, smallArea.getTitle());
-            spawn.setDestinationCoordinate(ICMazeArea.AreaPortals.E, smallArea.getEstPortalSpawn());
-
-            smallArea.openPortal(ICMazeArea.AreaPortals.W, spawn.getTitle());
-            smallArea.lockPortalWithKey(ICMazeArea.AreaPortals.E, smallArea.getKeyID(),mediumArea.getTitle());
-            smallArea.setDestinationCoordinate(ICMazeArea.AreaPortals.W, spawn.getWestPortalSpawn());
-            smallArea.setDestinationCoordinate(ICMazeArea.AreaPortals.E, mediumArea.getEstPortalSpawn());
-
-            mediumArea.openPortal(ICMazeArea.AreaPortals.W, smallArea.getTitle());
-            mediumArea.lockPortalWithKey(ICMazeArea.AreaPortals.E, mediumArea.getKeyID(), largeArea.getTitle());
-            mediumArea.setDestinationCoordinate(ICMazeArea.AreaPortals.W, smallArea.getWestPortalSpawn());
-            mediumArea.setDestinationCoordinate(ICMazeArea.AreaPortals.E, largeArea.getEstPortalSpawn());
-
-            largeArea.openPortal(ICMazeArea.AreaPortals.W, mediumArea.getTitle());
-            largeArea.lockPortalWithKey(ICMazeArea.AreaPortals.E,  largeArea.getKeyID(), bossArea.getTitle());
-            largeArea.setDestinationCoordinate(ICMazeArea.AreaPortals.W, mediumArea.getWestPortalSpawn());
-            largeArea.setDestinationCoordinate(ICMazeArea.AreaPortals.E, bossArea.getEstPortalSpawn());
-
-            bossArea.openPortal(ICMazeArea.AreaPortals.W, largeArea.getTitle());
-            bossArea.setDestinationCoordinate(ICMazeArea.AreaPortals.W, largeArea.getWestPortalSpawn());
-
-            // Ajout des aires au jeu
-            addArea(spawn);
-            addArea(smallArea);
-            addArea(mediumArea);
-            addArea(largeArea);
-            addArea(bossArea);
-        }
+//        private void generateHardCodedLevel() {
+//
+//            // Création des aires
+//            SmallArea smallArea = new SmallArea(ICMazeArea.AreaPortals.E,ICMazeArea.AreaPortals.W, Integer.MAX_VALUE);
+//            MediumArea mediumArea = new MediumArea(ICMazeArea.AreaPortals.E,ICMazeArea.AreaPortals.W, Integer.MAX_VALUE);
+//            LargeArea largeArea = new LargeArea(ICMazeArea.AreaPortals.E,ICMazeArea.AreaPortals.W, Integer.MAX_VALUE);
+//
+//            spawn.lockPortalWithKey(ICMazeArea.AreaPortals.E, Integer.MAX_VALUE, smallArea.getTitle());
+//            spawn.setDestinationCoordinate(ICMazeArea.AreaPortals.E, smallArea.getEstPortalSpawn());
+//
+//            smallArea.openPortal(ICMazeArea.AreaPortals.W, spawn.getTitle());
+//            smallArea.lockPortalWithKey(ICMazeArea.AreaPortals.E, smallArea.getKeyID(),mediumArea.getTitle());
+//            smallArea.setDestinationCoordinate(ICMazeArea.AreaPortals.W, spawn.getWestPortalSpawn());
+//            smallArea.setDestinationCoordinate(ICMazeArea.AreaPortals.E, mediumArea.getEstPortalSpawn());
+//
+//            mediumArea.openPortal(ICMazeArea.AreaPortals.W, smallArea.getTitle());
+//            mediumArea.lockPortalWithKey(ICMazeArea.AreaPortals.E, mediumArea.getKeyID(), largeArea.getTitle());
+//            mediumArea.setDestinationCoordinate(ICMazeArea.AreaPortals.W, smallArea.getWestPortalSpawn());
+//            mediumArea.setDestinationCoordinate(ICMazeArea.AreaPortals.E, largeArea.getEstPortalSpawn());
+//
+//            largeArea.openPortal(ICMazeArea.AreaPortals.W, mediumArea.getTitle());
+//            largeArea.lockPortalWithKey(ICMazeArea.AreaPortals.E,  largeArea.getKeyID(), bossArea.getTitle());
+//            largeArea.setDestinationCoordinate(ICMazeArea.AreaPortals.W, mediumArea.getWestPortalSpawn());
+//            largeArea.setDestinationCoordinate(ICMazeArea.AreaPortals.E, bossArea.getEstPortalSpawn());
+//
+//            bossArea.lockPortalWithKey(ICMazeArea.AreaPortals.W, -1,largeArea.getTitle());
+//            bossArea.setDestinationCoordinate(ICMazeArea.AreaPortals.W, largeArea.getWestPortalSpawn());
+//
+//            // Ajout des aires au jeu
+//            addArea(spawn);
+//            addArea(smallArea);
+//            addArea(mediumArea);
+//            addArea(largeArea);
+//            addArea(bossArea);
+//        }
 
         @Override
         public void end() {
@@ -176,16 +191,5 @@
             key2 = new Key(area, key2Position, Integer.MAX_VALUE-1);
             area.registerActor(key1);
             area.registerActor(key2);
-
-            LogMonster logMonster = new LogMonster(getCurrentArea(), Orientation.LEFT, new DiscreteCoordinates(2,5), 5, LogMonster.State.TARGETING);
-            area.registerActor(logMonster);
-            // Initialise le rocher
-//            rock = new Rock(area, rockPosition);
-//            area.registerActor(rock);
-//            area.registerActor(new Rock(area, new DiscreteCoordinates(3,4)));
-//            area.registerActor(new Rock(area, new DiscreteCoordinates(3,5)));
-            area.registerActor(new Rock(area, new DiscreteCoordinates(3,6)));
-
-
         }
     }

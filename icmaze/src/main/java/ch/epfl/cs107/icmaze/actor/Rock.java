@@ -2,6 +2,7 @@ package ch.epfl.cs107.icmaze.actor;
 
 import ch.epfl.cs107.icmaze.RandomGenerator;
 import ch.epfl.cs107.icmaze.actor.collectable.Heart;
+import ch.epfl.cs107.icmaze.area.maps.MazeLevels;
 import ch.epfl.cs107.icmaze.handler.ICMazeInteractionVisitor;
 import ch.epfl.cs107.play.areagame.actor.AreaEntity;
 import ch.epfl.cs107.play.areagame.area.Area;
@@ -10,100 +11,184 @@ import ch.epfl.cs107.play.engine.actor.Animation;
 import ch.epfl.cs107.play.engine.actor.Sprite;
 import ch.epfl.cs107.play.math.DiscreteCoordinates;
 import ch.epfl.cs107.play.math.Orientation;
+import ch.epfl.cs107.play.math.Transform;
 import ch.epfl.cs107.play.math.Vector;
 import ch.epfl.cs107.play.window.Canvas;
 
 import java.util.Collections;
 import java.util.List;
 
-public class Rock extends AreaEntity {
-    private Sprite sprite ;
-    private boolean isBroken;
 
-    // Points de vies
+/**
+ * Represents a destructible rock in the game.
+ * <p>
+ * A rock is an obstacle that blocks movement while intact. It can be damaged from a distance,
+ * becomes temporarily immune after taking damage, and disappears with a vanishing animation
+ * when destroyed. When the animation completes, it may spawn a {@link Heart} and updates the
+ * walkable graph of the current {@link MazeLevels}.
+ * </p>
+ */
+
+public class Rock extends AreaEntity {
+
+    private Sprite sprite;
+    private boolean isBroken;
     private final int maxHP;
     private int currentHP;
-
-    // Animation de disparition
-    private Animation vanishAnimation = new Animation("icmaze/vanish", 7, 2, 2, this,
+    private Animation vanishAnimation = new Animation(
+            "icmaze/vanish", 7, 2, 2, this,
             32, 32, new Vector(-0.5f, 0.0f),
-            24/7, false);;
-    private boolean isVanishing = false;
+            24 / 7, false
+    );
 
+    private boolean isVanishing ;
+    private Health health;
+
+    private static final int IMMUNITY_DURATION = 20;
+    private int immunityFrames ;
+    private boolean isImmune ;
+
+    /**
+     * Creates a new rock at the given position in the specified area.
+     * @param area (Area): the area where the rock is located
+     * @param position (DiscreteCoordinates): the initial position of the rock
+     */
     public Rock(Area area, DiscreteCoordinates position) {
         super(area, Orientation.LEFT, position);
         sprite = new Sprite("rock.2", 1, 1, this);
 
-        // Points de vies
         maxHP = 3;
         currentHP = maxHP;
+        health = new Health(this, Transform.I.translated(0, 1.3f), maxHP, true);
+        isVanishing = false;
+        immunityFrames = 0;
+        isImmune= false;
     }
 
+    /**
+     * Draws the rock on the canvas.
+     * If the rock is vanishing, draws the vanishing animation. Otherwise draws the rock sprite,
+     * with a blinking effect during immunity, and draws the health bar while immune.
+     * @param canva (Canvas): the canvas to draw on
+     */
     @Override
-    public void draw(Canvas canva){
-        if(isVanishing){
+    public void draw(Canvas canva) {
+        if (isVanishing) {
             vanishAnimation.draw(canva);
-        }else {
-            sprite.draw(canva);
+        } else {
+            if (!isImmune || immunityFrames % 2 == 0) {
+                sprite.draw(canva);
+            }
+            if (isImmune) {
+                health.draw(canva);
+            }
         }
     }
 
+    /**
+     * Updates the rock state.
+     * Handles immunity timing and vanishing animation. When the vanishing animation completes,
+     * the rock may spawn a {@link Heart}, updates the walkable graph of the current {@link MazeLevels},
+     * and unregisters itself from the area.
+     * @param deltaTime (float): time elapsed since last update
+     */
     @Override
     public void update(float deltaTime) {
         super.update(deltaTime);
 
+        if (isImmune) {
+            immunityFrames -= deltaTime;
+            if (immunityFrames <= 0) {
+                isImmune = false;
+            }
+        }
+
         if (isVanishing) {
             vanishAnimation.update(deltaTime);
-
             if (vanishAnimation.isCompleted()) {
-                // 50 % de chance de faire spawn un coeur
                 if (RandomGenerator.rng.nextDouble() < 0.5) {
                     Heart heart = new Heart(getOwnerArea(), getCurrentMainCellCoordinates());
                     getOwnerArea().registerActor(heart);
                 }
-
+                ((MazeLevels) getOwnerArea()).addWalkableCellToGraph(getCurrentMainCellCoordinates());
                 getOwnerArea().unregisterActor(this);
             }
         }
     }
 
+    /**
+     * Gets the list of cells currently occupied by the rock.
+     * @return (List<DiscreteCoordinates>): a singleton list containing the main cell coordinates
+     */
     @Override
     public List<DiscreteCoordinates> getCurrentCells() {
         return Collections.singletonList(getCurrentMainCellCoordinates());
     }
 
-
+    /**
+     * Indicates whether the rock blocks the cell it occupies.
+     * @return (boolean): {@code true} if the rock is not broken and not vanishing
+     */
     @Override
     public boolean takeCellSpace() {
         return !isBroken && !isVanishing;
     }
 
+    /**
+     * Indicates whether the rock can be interacted with via cell interaction.
+     * @return (boolean): {@code false}
+     */
     @Override
     public boolean isCellInteractable() {
-        return false;  // Pas dinteraction avec le rocher
+        return false;
     }
 
+    /**
+     * Indicates whether the rock can be interacted with from a distance.
+     * @return (boolean): {@code true}
+     */
     @Override
     public boolean isViewInteractable() {
-        return true;  // Peut se faire casser
+        return true;
     }
 
+    /**
+     * Accepts an interaction from an area interaction visitor.
+     *
+     * @param v (AreaInteractionVisitor): the interaction visitor
+     * @param isCellInteraction (boolean): whether the interaction is a cell interaction
+     */
     @Override
     public void acceptInteraction(AreaInteractionVisitor v, boolean isCellInteraction) {
         ((ICMazeInteractionVisitor) v).interactWith(this, isCellInteraction);
     }
 
-    public void attackWithPickaxe() {
-        if (!isBroken) {
-            currentHP -= 1;
+    /**
+     * Makes the rock lose health points.
+     * If the rock is not immune, damage is applied and temporary immunity is activated.
+     * When health reaches zero, the rock becomes broken and starts vanishing.
+     * @param HP (int): amount of health points to remove
+     */
+    public void loseHP(int HP) {
+        if (!isImmune && health.isOn()) {
+            health.decrease(HP);
+            this.currentHP -= HP;
 
-            if (currentHP <= 0) {
-                isBroken = true;
-                isVanishing = true;
-            }
+            isImmune = true;
+            immunityFrames = IMMUNITY_DURATION;
+        }
+        if (currentHP <= 0) {
+            isBroken = true;
+            isVanishing = true;
         }
     }
+
+    /**
+     * Indicates whether the rock is broken.
+     * @return (boolean): {@code true} if the rock is broken
+     */
     public boolean isBroken() {
         return isBroken;
     }
 }
+

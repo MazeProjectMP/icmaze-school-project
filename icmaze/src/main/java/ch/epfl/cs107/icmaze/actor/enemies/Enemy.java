@@ -19,103 +19,154 @@ import ch.epfl.cs107.play.window.Canvas;
 import java.util.Collections;
 import java.util.List;
 
+
 public abstract class Enemy extends MovableAreaEntity implements Interactable, Interactor {
 
-    // Points de vies de l'enemy
     private final int maxHP;
     private int currentHP;
     private boolean isDead;
-
     private Sprite sprite;
 
-    // Animation de disparition
-    private Animation vanishAnimation = new Animation("icmaze/vanish", 7, 2, 2, this,
-            32, 32, new Vector(-0.5f, 0.0f),
-            24/7, false);;
-    private boolean isVanishing = false;
+    private Animation vanishAnimation ;
+    private boolean isVanishing ;
 
     /**
-     * Default AreaEntity constructor
-     *
-     * @param area        (Area): Owner area. Not null
-     * @param orientation (Orientation): Initial orientation of the entity in the Area. Not null
-     * @param position    (DiscreteCoordinate): Initial position of the entity in the Area. Not null
+     * Creates a new enemy.
+     * @param area (Area): the area where the enemy is located
+     * @param orientation (Orientation): initial orientation of the enemy
+     * @param position (DiscreteCoordinates): initial position of the enemy
+     * @param maxHP (int): maximum health points of the enemy
      */
     public Enemy(Area area, Orientation orientation, DiscreteCoordinates position, int maxHP) {
         super(area, orientation, position);
         this.maxHP = maxHP;
         this.currentHP = maxHP;
         this.isDead = false;
+
+        isVanishing = false;
+        vanishAnimation = new Animation(
+                "icmaze/vanish", 7, 2, 2, this,
+                32, 32, new Vector(-0.5f, 0.0f),
+                24 / 7, false
+        );
     }
 
+    /**
+     * Updates the enemy state.
+     * Handles the vanishing animation when the enemy is dying.
+     * @param deltaTime (float): time elapsed since last update
+     */
     @Override
     public void update(float deltaTime) {
         super.update(deltaTime);
 
         if (isVanishing) {
             vanishAnimation.update(deltaTime);
-
             if (vanishAnimation.isCompleted()) {
                 getOwnerArea().unregisterActor(this);
             }
         }
     }
 
+    /**
+     * Draws the enemy on the canvas.
+     * Only the vanishing animation is drawn when the enemy is disappearing.
+     * @param canvas (Canvas): the canvas to draw on
+     */
     @Override
     public void draw(Canvas canvas) {
-        if(isVanishing()) {
+        if (isVanishing()) {
             vanishAnimation.draw(canvas);
         }
-
     }
-    // Prend des degats
+
+    /**
+     * Makes the enemy lose health points.
+     * When health reaches zero, the enemy starts vanishing.
+     * @param HP (int): amount of health points to remove
+     */
     public void loseHP(int HP) {
         this.currentHP -= HP;
         if (currentHP <= 0) {
-            disappear(); // Disparait a sa mort
+            disappear();
         }
     }
 
+    /**
+     * Indicates whether the enemy is dead
+     * @return (boolean): {@code true} if the enemy is dead
+     */
     public boolean isDead() {
         return this.isDead;
     }
 
-    private void disappear(){
+    /**
+     * Makes the enemy disappear.
+     */
+    private void disappear() {
         isDead = true;
         isVanishing = true;
     }
 
-    public boolean isVanishing(){
+    /**
+     * Indicates whether the enemy is currently vanishing.
+     * @return (boolean): {@code true} if the enemy is vanishing
+     */
+    protected boolean isVanishing() {
         return isVanishing;
     }
 
-    public Animation vanishAnimation(){
+    /**
+     * Gets the vanishing animation.
+     * @return (Animation): the vanishing animation
+     */
+    public Animation vanishAnimation() {
         return vanishAnimation;
     }
 
+    /**
+     * Indicates whether the enemy blocks the cell it occupies.
+     * @return (boolean): {@code true} if the enemy is alive
+     */
     @Override
     public boolean takeCellSpace() {
         return !isDead();
     }
 
+    /**
+     * Indicates whether the enemy can be interacted with via cell interaction.
+     * @return (boolean): {@code false}
+     */
     @Override
     public boolean isCellInteractable() {
         return false;
-    } // Pas d'interaction de surface
+    }
 
+    /**
+     * Indicates whether the enemy can be interacted with from a distance.
+     * @return (boolean): {@code true}
+     */
     @Override
     public boolean isViewInteractable() {
         return true;
-    } // Interaction a distance
+    }
 
+    /**
+     * Gets the list of cells currently occupied by the enemy.
+     * @return (List<DiscreteCoordinates>): a singleton list containing the main cell coordinates
+     */
     @Override
     public List<DiscreteCoordinates> getCurrentCells() {
         return Collections.singletonList(getCurrentMainCellCoordinates());
     }
 
+    /**
+     * Accepts an interaction from an area interaction visitor.
+     * @param v (AreaInteractionVisitor): the interaction visitor
+     * @param isCellInteraction (boolean): whether the interaction is a cell interaction
+     */
     @Override
     public void acceptInteraction(AreaInteractionVisitor v, boolean isCellInteraction) {
         ((ICMazeInteractionVisitor) v).interactWith(this, isCellInteraction);
     }
-
 }
