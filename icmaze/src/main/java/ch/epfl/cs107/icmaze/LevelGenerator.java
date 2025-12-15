@@ -11,21 +11,18 @@ import java.util.Set;
 
 /**
  * Utility class responsible for procedural generation of ICMaze levels.
- * <p>
- * Implements the linear generation algorithm described in section 4.3: Spawn,
- * then a sequence of maze areas, then the BossArea, with no overlaps in the
- * fictitious placement grid.
+ * Spawn,then a sequence of maze areas, then the BossArea
  */
 public final class LevelGenerator {
 
     private static final int DEFAULT_MAZE_COUNT = 3;
     private static final int START_KEY_ID = Integer.MAX_VALUE;
-
+    private static final ICMazeArea.AreaPortals[] FORWARD_DIRECTIONS = { ICMazeArea.AreaPortals.N, ICMazeArea.AreaPortals.E, ICMazeArea.AreaPortals.S};
     /**
-     * Generates a linear level: Spawn + {@code numberOfMazeAreas} labyrinth areas + BossArea.
-     * If {@code numberOfMazeAreas == 0}, BossArea is connected directly after Spawn.
-     * @param game              the game instance (kept for signature compatibility)
-     * @param numberOfMazeAreas number of labyrinth areas to generate (>= 0 recommended)
+     * Generates a linear level: Spawn + numberOfMazeAreas labyrinth areas + BossArea.
+     * If numberOfMazeAreas == 0, BossArea is connected directly after Spawn.
+     * @param game              the game instance
+     * @param numberOfMazeAreas number of labyrinth areas to generate
      * @return an array of areas in loading order (Spawn ... BossArea)
      */
     public static ICMazeArea[] generateLine(ICMaze game, int numberOfMazeAreas) {
@@ -42,14 +39,19 @@ public final class LevelGenerator {
 
         ICMazeArea previousArea = spawn;
 
-        int exitKeyId = START_KEY_ID;          // key required to leave previousArea
-        int nextAreaKeyId = START_KEY_ID - 1;  // key that will be placed in the next maze area
+        int exitKeyId = START_KEY_ID;
+        int nextAreaKeyId = START_KEY_ID - 1;
 
         for (int i = 0; i < length; i++) {
             double progress = (double) (i + 1) / length;
             int difficulty = calculateDifficulty(progress);
 
-            ICMazeArea.AreaPortals exitDirection = chooseForwardFreeDirection(currentPosition, occupiedPositions);
+            ICMazeArea.AreaPortals exitDirection;
+            if (i == 0) {
+                exitDirection = ICMazeArea.AreaPortals.E; // Par defaut le portail a partir du spawn est EST
+            } else {
+                exitDirection = chooseForwardFreeDirection(currentPosition, occupiedPositions);
+            }
             DiscreteCoordinates nextPosition = getNextPosition(currentPosition, exitDirection);
             ICMazeArea.AreaPortals entryDirection = getOppositeDirection(exitDirection);
 
@@ -67,13 +69,18 @@ public final class LevelGenerator {
             nextAreaKeyId--;
         }
 
-        ICMazeArea.AreaPortals bossExitDirection = chooseForwardFreeDirection(currentPosition, occupiedPositions);
+        ICMazeArea.AreaPortals bossExitDirection;
+        if (length == 0) {
+            bossExitDirection = ICMazeArea.AreaPortals.E; // Si on vient directement du SPAWN
+        } else {
+            bossExitDirection = chooseForwardFreeDirection(currentPosition, occupiedPositions);
+        }
+
         DiscreteCoordinates bossPosition = getNextPosition(currentPosition, bossExitDirection);
         ICMazeArea.AreaPortals bossEntryDirection = getOppositeDirection(bossExitDirection);
-
         BossArea bossArea = new BossArea();
         connectAreasWithKey(previousArea, bossExitDirection, bossArea, bossEntryDirection, exitKeyId);
-        bossArea.lockPortalWithKey(bossEntryDirection, -1, previousArea.getTitle());
+        bossArea.lockPortalWithKey(bossEntryDirection, -1, previousArea.getTitle()); // Piege fatal
         areas.add(bossArea);
         occupiedPositions.add(bossPosition);
 
@@ -88,17 +95,11 @@ public final class LevelGenerator {
      */
     private static ICMazeArea.AreaPortals chooseForwardFreeDirection(DiscreteCoordinates currentPosition, Set<DiscreteCoordinates> occupiedPositions) {
         List<ICMazeArea.AreaPortals> candidates = new ArrayList<>(3);
-        for (ICMazeArea.AreaPortals direction : new ICMazeArea.AreaPortals[]{
-                ICMazeArea.AreaPortals.N, ICMazeArea.AreaPortals.E, ICMazeArea.AreaPortals.S
-        }) {
+        for (ICMazeArea.AreaPortals direction : FORWARD_DIRECTIONS) {
             DiscreteCoordinates target = getNextPosition(currentPosition, direction);
             if (!occupiedPositions.contains(target)) {
                 candidates.add(direction);
             }
-        }
-
-        if (candidates.isEmpty()) {
-            return ICMazeArea.AreaPortals.E; // fallback defensive
         }
         return candidates.get(RandomGenerator.rng.nextInt(candidates.size()));
     }
@@ -120,7 +121,7 @@ public final class LevelGenerator {
 
     /**
      * Converts the generation progress (0..1] into a difficulty level.
-     * The mapping follows the specification using {@code (int)(progress * 4)}.
+     * The mapping follows the specification using (int)(progress * 4).
      * @param progress generation progress (in (0, 1])
      * @return one of {@link Difficulty#EASY}, {@link Difficulty#MEDIUM}, {@link Difficulty#HARD}, {@link Difficulty#HARDEST}
      */
@@ -135,7 +136,7 @@ public final class LevelGenerator {
     }
 
     /**
-     * Creates a maze area (Small/Medium/Large) using the probabilistic rule based on {@code progress}.
+     * Creates a maze area (Small/Medium/Large) using the probabilistic rule based on progress.
      * @param progress   generation progress
      * @param difficulty difficulty constant for the created area
      * @param entry      entry portal direction for the created area
@@ -166,7 +167,7 @@ public final class LevelGenerator {
 
     /**
      * Connects two areas with a bidirectional portal setup.
-     * The portal in {@code fromArea} is locked with {@code keyId}.
+     * The portal in fromArea is locked with keyID.
      * @param fromArea      source area
      * @param fromDirection portal direction in source area
      * @param toArea        destination area

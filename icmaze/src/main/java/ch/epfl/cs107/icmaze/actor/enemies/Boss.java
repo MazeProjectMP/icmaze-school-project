@@ -1,17 +1,19 @@
 package ch.epfl.cs107.icmaze.actor.enemies;
 
+import ch.epfl.cs107.icmaze.RandomGenerator;
 import ch.epfl.cs107.icmaze.actor.Health;
-import ch.epfl.cs107.icmaze.actor.collectable.Heart;
 import ch.epfl.cs107.icmaze.actor.collectable.Key;
+import ch.epfl.cs107.icmaze.actor.util.Cooldown;
 import ch.epfl.cs107.play.areagame.actor.Interactable;
 import ch.epfl.cs107.play.areagame.area.Area;
-import ch.epfl.cs107.play.engine.actor.Animation;
 import ch.epfl.cs107.play.engine.actor.OrientedAnimation;
 import ch.epfl.cs107.play.math.DiscreteCoordinates;
 import ch.epfl.cs107.play.math.Orientation;
 import ch.epfl.cs107.play.math.Transform;
 import ch.epfl.cs107.play.math.Vector;
+import java.util.HashMap;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -34,6 +36,15 @@ public class Boss extends Enemy {
     private int immunityFrames;
     private boolean isImmune;
 
+
+    private boolean activated; // Activation du Boss
+    private static final int SIZE = 8;
+    private static final int MID = SIZE / 2 + 1;
+    private static final DiscreteCoordinates CENTER = new DiscreteCoordinates(MID, MID);
+    HashMap<DiscreteCoordinates, Orientation> teleportationList = new HashMap<>(); // Puisqu'on a simplifier les lieux de teleportation, on peut utiliser une hashmap
+
+    private Cooldown attackCooldown;
+
     /**
      * Creates a new boss enemy.
      * @param area (Area): the area where the boss is located
@@ -52,10 +63,16 @@ public class Boss extends Enemy {
         immunityFrames = 0;
         isImmune = false;
 
-        bossAnimation = new OrientedAnimation(
-                "icmaze/boss", ANIMATION_DURATION / 3,
-                this, anchor, orders, 4, 2, 2, 32, 32, true
-        );
+        bossAnimation = new OrientedAnimation("icmaze/boss", ANIMATION_DURATION / 3, this, anchor, orders, 3, 2, 2, 32, 32, true);
+
+        activated = false;
+
+        teleportationList.put(new DiscreteCoordinates(MID, SIZE), Orientation.DOWN); // En haut
+        teleportationList.put(new DiscreteCoordinates(MID, 1), Orientation.UP); // En bas
+        teleportationList.put(new DiscreteCoordinates(1, MID), Orientation.RIGHT); // A gauche
+        teleportationList.put(new DiscreteCoordinates(SIZE, MID), Orientation.LEFT); // A droite
+
+        attackCooldown = new Cooldown(2);
     }
 
     /**
@@ -66,20 +83,71 @@ public class Boss extends Enemy {
     @Override
     public void update(float deltaTime) {
         super.update(deltaTime);
+        bossAnimation.update(deltaTime);
+        if(activated && attackCooldown.ready(deltaTime)){
+            fireBallSpell();
+            attackCooldown.reset();
+        }
 
         if(isDead()){
             Key key = new Key(getOwnerArea(), getCurrentMainCellCoordinates(), -1);
             getOwnerArea().registerActor(key);
         }
-        // Handles immunity
+
         if (isImmune) {
             immunityFrames -= deltaTime;
             if (immunityFrames <= 0) {
                 isImmune = false;
             }
         }
+        if(bossAnimation.isCompleted()){
+            bossAnimation.reset();
+        }
     }
 
+    private void fireBallSpell() {
+        DiscreteCoordinates bossPosition = getCurrentMainCellCoordinates();
+        Orientation bossOrientation = getOrientation();
+
+        List<DiscreteCoordinates> spawnPositions = fireballsPositions(bossOrientation, bossPosition);
+
+        for (DiscreteCoordinates spawnPosition : spawnPositions) {
+            FireProjectile fireball = new FireProjectile(getOwnerArea(), bossOrientation, spawnPosition);
+            getOwnerArea().registerActor(fireball);
+            getOwnerArea().enterAreaCells(fireball, fireball.getCurrentCells());
+        }
+    }
+
+    /**
+     * Calcule les 7 positions du spell.
+     * Le trou est la position du boss
+     */
+    private List<DiscreteCoordinates> fireballsPositions(Orientation bossOrientation, DiscreteCoordinates bossPosition) {
+        List<DiscreteCoordinates> positions = new ArrayList<>(SIZE - 1);
+
+        switch (bossOrientation) {
+
+            case LEFT, RIGHT: {
+                int columnX = bossPosition.x;
+                for (int y = 1; y <= SIZE; y++) {
+                    if (y == bossPosition.y) continue; // trou = boss
+                    positions.add(new DiscreteCoordinates(columnX, y));
+                }
+                break;
+            }
+
+            case UP, DOWN: {
+                int rowY = bossPosition.y;
+                for (int x = 1; x <= SIZE; x++) {
+                    if (x == bossPosition.x) continue; // trou = boss
+                    positions.add(new DiscreteCoordinates(x, rowY));
+                }
+                break;
+            }
+        }
+
+        return positions;
+    }
     /**
      * Makes the boss lose health points.
      * If the boss is not immune, damage is applied and temporary immunity
@@ -88,14 +156,49 @@ public class Boss extends Enemy {
      */
     @Override
     public void loseHP(int HP) {
-        if (!isDead() && !isImmune && health.isOn()) {
+        if (isDead()) return;
+
+        if (!isImmune && health.isOn()) {
             isImmune = true;
             immunityFrames = IMMUNITY_DURATION_FRAMES;
+
+            if (!activated) {
+                activated = true;
+                teleportRandomly();
+            }else{
+                teleportRandomly();
+            }
+
             health.decrease(HP);
             super.loseHP(HP);
         }
     }
 
+
+    private DiscreteCoordinates randomTeleportCoordinates() {
+        HashMap<DiscreteCoordinates, Orientation> possiblePositions = new HashMap<>(teleportationList);
+        if(!getCurrentMainCellCoordinates().equals(CENTER)) {
+            possiblePositions.remove(getCurrentMainCellCoordinates()); // Si il n'est pas au centre, pour s'assurer qu'il ne prend pas la meme position
+        }
+        List<DiscreteCoordinates> possibleCoordinates = new ArrayList<>(possiblePositions.keySet()); // Copie permettant de faire une position aleatoire
+        DiscreteCoordinates randomCoordinate = possibleCoordinates.get(RandomGenerator.nextInt(possibleCoordinates.size()));
+
+        return randomCoordinate;
+    }
+
+    private void teleportRandomly() {
+        DiscreteCoordinates randomCoordinate = randomTeleportCoordinates();
+        Orientation orientation = teleportationList.get(randomCoordinate);
+        Area currentArea = getOwnerArea();
+
+        currentArea.unregisterActor(this);
+        currentArea.leaveAreaCells(this, getCurrentCells());
+        orientate(orientation);
+        setCurrentPosition(randomCoordinate.toVector());
+        resetMotion();
+        currentArea.enterAreaCells(this, getCurrentCells());
+        currentArea.registerActor(this);
+    }
     /**
      * Draws the boss and its health bar on the canvas.
      * @param canvas (Canvas): the canvas to draw on

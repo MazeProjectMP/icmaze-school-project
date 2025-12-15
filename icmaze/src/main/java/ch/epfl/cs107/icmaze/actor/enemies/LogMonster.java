@@ -93,7 +93,6 @@ public class LogMonster extends PathFinderEnemy {
         this.isImmune = false;
 
         /** health */
-
         this.health = new Health(this, Transform.I.translated(0, 2f), maxHP, false);
 
         /** animation data */
@@ -135,7 +134,7 @@ public class LogMonster extends PathFinderEnemy {
     /**
      * Handles interactions between the log monster and other entities.
      */
-    private class ICMazeEnemyInteractionHandler implements ICMazeInteractionVisitor {
+    private class ICMazeLogMonsterInteractionHandler implements ICMazeInteractionVisitor {
         /**
          * Handles interaction with the player.
          * @param player (ICMazePlayer): the interacting player
@@ -147,7 +146,6 @@ public class LogMonster extends PathFinderEnemy {
             if (currentState == State.SLEEPING) return;
 
             if (!isCellInteraction) {
-
                 /** cell in front of the  monster */
                 DiscreteCoordinates inFront = getCurrentMainCellCoordinates().jump(getOrientation().toVector());
 
@@ -162,7 +160,7 @@ public class LogMonster extends PathFinderEnemy {
     }
 
 
-    private final ICMazeEnemyInteractionHandler handler = new ICMazeEnemyInteractionHandler();
+    private final ICMazeLogMonsterInteractionHandler handler = new ICMazeLogMonsterInteractionHandler();
     /**
      * Interacts with the given interactable.
      * @param other (Interactable): the interactable entity

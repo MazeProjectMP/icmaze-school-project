@@ -63,7 +63,7 @@
 
         private void createAreas() {
 //            generateHardCodedLevel();
-            ICMazeArea[] generatedAreas = LevelGenerator.generateLine(this, 2); // 3 aires labyrinthiques
+            ICMazeArea[] generatedAreas = LevelGenerator.generateLine(this, 0); // 3 aires labyrinthiques
 
             // Ajouter toutes les aires au jeu
             for (ICMazeArea area : generatedAreas) {

@@ -4,6 +4,7 @@ import ch.epfl.cs107.icmaze.KeyBindings;
 import ch.epfl.cs107.icmaze.actor.collectable.Heart;
 import ch.epfl.cs107.icmaze.actor.collectable.Key;
 import ch.epfl.cs107.icmaze.actor.collectable.Pickaxe;
+import ch.epfl.cs107.icmaze.actor.enemies.Boss;
 import ch.epfl.cs107.icmaze.actor.enemies.Enemy;
 import ch.epfl.cs107.icmaze.handler.ICMazeInteractionVisitor;
 import ch.epfl.cs107.play.areagame.actor.Interactable;
@@ -31,7 +32,7 @@ import static ch.epfl.cs107.play.math.Orientation.*;
 public class ICMazePlayer extends MovableAreaEntity implements Interactor, Interactable {
 
     private final static KeyBindings.PlayerKeyBindings keys = KeyBindings.PLAYER_KEY_BINDINGS; // Initialise les touches du joueur
-    private final static String prefix = "icmaze/player"; // Lien de l'image ?
+    private final static String prefix = "icmaze/player"; // Lien de l'image
     private final static int ANIMATION_DURATION = 1 ;
     private PlayerState state = PlayerState.IDLE; // L'etat du personnage
     private final static int MOVE_DURATION = 5;
@@ -67,7 +68,7 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
 
     // health interaction
     private Health health;
-    private static final int IMMUNITY_DURATION = 45; // 24 frames comme demandé
+    private static final int IMMUNITY_DURATION = 40;
     private int immunityFrames = 0;
     private boolean isImmune = false;
     /**
