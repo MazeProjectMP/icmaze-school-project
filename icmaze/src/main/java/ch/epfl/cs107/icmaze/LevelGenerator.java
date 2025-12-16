@@ -3,6 +3,7 @@ package ch.epfl.cs107.icmaze;
 import ch.epfl.cs107.icmaze.area.ICMazeArea;
 import ch.epfl.cs107.icmaze.area.maps.*;
 import ch.epfl.cs107.play.math.DiscreteCoordinates;
+import ch.epfl.cs107.play.signal.logic.Logic;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -14,10 +15,10 @@ import java.util.Set;
  * Spawn,then a sequence of maze areas, then the BossArea
  */
 public final class LevelGenerator {
-
     private static final int DEFAULT_MAZE_COUNT = 3;
     private static final int START_KEY_ID = Integer.MAX_VALUE;
     private static final ICMazeArea.AreaPortals[] FORWARD_DIRECTIONS = { ICMazeArea.AreaPortals.N, ICMazeArea.AreaPortals.E, ICMazeArea.AreaPortals.S};
+
     /**
      * Generates a linear level: Spawn + numberOfMazeAreas labyrinth areas + BossArea.
      * If numberOfMazeAreas == 0, BossArea is connected directly after Spawn.
@@ -31,7 +32,7 @@ public final class LevelGenerator {
         List<ICMazeArea> areas = new ArrayList<>(length + 2);
         Set<DiscreteCoordinates> occupiedPositions = new HashSet<>();
 
-        Spawn spawn = new Spawn();
+        Spawn spawn = new Spawn(game); // Prend le dialogue du Jeu en parametre
         areas.add(spawn);
 
         DiscreteCoordinates currentPosition = new DiscreteCoordinates(0, 0);
@@ -84,6 +85,13 @@ public final class LevelGenerator {
         areas.add(bossArea);
         occupiedPositions.add(bossPosition);
 
+        Logic bossSolved = bossArea; // BossArea est un Logic
+
+        for (ICMazeArea area : areas) {
+            if (area != bossArea) {
+                area.setWinningSignal(bossSolved); // spawn + labyrinthes => ON quand bossArea ON
+            }
+        }
         return areas.toArray(new ICMazeArea[0]);
     }
 

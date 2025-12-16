@@ -25,6 +25,10 @@ public class MazeLevels extends ICMazeArea {
     private final String mapName;
 
     private Key key;
+
+    private ArrayList<Rock> walls;
+    private ArrayList<LogMonster> logMonsters;
+
     public MazeLevels(AreaPortals areaPortalEntry, AreaPortals areaPortalExit, int difficulty, int keyID, String mapName, int sizeSide) {
         super(mapName, sizeSide);
 
@@ -33,6 +37,9 @@ public class MazeLevels extends ICMazeArea {
         this.difficulty = difficulty;
         this.mapName = mapName;
         this.keyID = keyID;
+
+        walls = new ArrayList<>();
+        logMonsters = new ArrayList<>();
     }
 
     @Override
@@ -66,9 +73,26 @@ public class MazeLevels extends ICMazeArea {
                     int maxHP = 3;
 
                     LogMonster logMonster = new LogMonster(this, initialOrientation, initialPosition, maxHP, initialState, areaGraph, difficulty);
+                    logMonsters.add(logMonster);
                     this.registerActor(logMonster);
                 }
             }
+    }
+    @Override
+    public void update(float deltatime){
+        super.update(deltatime);
+        if(isOn()){
+            winGame();
+        }
+    }
+
+    private void winGame(){
+        for(LogMonster logMonster : logMonsters){
+            logMonster.sleep();
+        }
+        for(Rock rock : walls){
+            rock.breakWall();
+        }
     }
 
     // Determine l'Etat initiale du logMonster
@@ -120,6 +144,7 @@ public class MazeLevels extends ICMazeArea {
             for(int x = 0; x < getSizeSide() ; x++){
                 if(maze[y][x] == 1 && notInSpawn(x+1,y+1)){
                     Rock rock = new Rock(this, new DiscreteCoordinates(x+1,y+1)); // +1 car on place le maze dans l'aire jouable
+                    walls.add(rock);
                     registerActor(rock);
                 }else{
                     chemins[x + 1][y + 1] = true;

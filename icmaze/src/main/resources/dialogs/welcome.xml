@@ -1,5 +1,5 @@
 <strings id="welcome">
-    <string name="game_name">Bienvenue dans le labyrinthe ICMaze ! → Entrée pour continuer</string>
+    <string name="game_name">Bienvenue dans le labyrinthe ICMaze !<br/> → Entrée pour continuer</string>
     <string name="game_name">Déplace ton héros avec les flèches directionnelles.</string>
     <string name="game_name">Attaque avec la touche ESPACE ; Interagis avec les portails avec E.</string>
     <string name="game_name">Traverse les salles, ramasse des clés et ouvre les portails pour progresser.</string>

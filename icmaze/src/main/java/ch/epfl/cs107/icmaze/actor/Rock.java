@@ -116,6 +116,12 @@ public class Rock extends AreaEntity {
         }
     }
 
+    public void breakWall(){
+        currentHP = 0;
+        isBroken = true;
+        isVanishing = true;
+    }
+
     /**
      * Gets the list of cells currently occupied by the rock.
      * @return (List<DiscreteCoordinates>): a singleton list containing the main cell coordinates

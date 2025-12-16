@@ -7,9 +7,10 @@ import ch.epfl.cs107.play.engine.actor.Background;
 import ch.epfl.cs107.play.io.FileSystem;
 import ch.epfl.cs107.play.math.DiscreteCoordinates;
 import ch.epfl.cs107.play.math.Orientation;
+import ch.epfl.cs107.play.signal.logic.Logic;
 import ch.epfl.cs107.play.window.Window;
 
-public abstract class ICMazeArea extends Area {
+public abstract class ICMazeArea extends Area implements Logic {
     private String title;
     public final static float DEFAULT_SCALE_FACTOR = 11.f;
     private int sizeSide; // Longueur du cote de l'aire
@@ -23,9 +24,8 @@ public abstract class ICMazeArea extends Area {
     // Mise en place de l'Area Graph
     protected AreaGraph areaGraph = new AreaGraph();
 
-    /**
-     * Area specific callback to initialise the instance
-     */
+    private Logic solvedSignal = Logic.FALSE;
+    private Logic winningSignal = Logic.FALSE;
 
     /**
      * @return the player's spawn position in the area
@@ -37,6 +37,17 @@ public abstract class ICMazeArea extends Area {
         this.sizeSide = sizeSide;
         initPortals();
     }
+
+
+    public final void setWinningSignal(Logic signal) {
+        winningSignal = (signal == null) ? Logic.FALSE : signal;
+    }
+
+    @Override
+    public final boolean isOn() { return winningSignal.isOn(); }
+
+    @Override
+    public final boolean isOff() { return solvedSignal.isOff(); }
     /**
      * Callback to initialise the instance of the area
      * @param window (Window): display context. Not null

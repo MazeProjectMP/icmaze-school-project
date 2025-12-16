@@ -11,6 +11,8 @@ import ch.epfl.cs107.play.math.DiscreteCoordinates;
 import ch.epfl.cs107.play.math.Orientation;
 import ch.epfl.cs107.play.math.Transform;
 import ch.epfl.cs107.play.math.Vector;
+import ch.epfl.cs107.play.signal.logic.Logic;
+
 import java.util.HashMap;
 
 import java.util.ArrayList;
@@ -18,7 +20,6 @@ import java.util.List;
 
 
 public class Boss extends Enemy {
-
 
     /** Duration of the boss animation. */
     private static final int ANIMATION_DURATION = 60;
@@ -44,6 +45,8 @@ public class Boss extends Enemy {
     HashMap<DiscreteCoordinates, Orientation> teleportationList = new HashMap<>(); // Puisqu'on a simplifier les lieux de teleportation, on peut utiliser une hashmap
 
     private Cooldown attackCooldown;
+    private boolean keyDropped = false;
+    private Logic droppedKeySignal = Logic.FALSE;
 
     /**
      * Creates a new boss enemy.
@@ -72,7 +75,7 @@ public class Boss extends Enemy {
         teleportationList.put(new DiscreteCoordinates(1, MID), Orientation.RIGHT); // A gauche
         teleportationList.put(new DiscreteCoordinates(SIZE, MID), Orientation.LEFT); // A droite
 
-        attackCooldown = new Cooldown(2);
+        attackCooldown = new Cooldown(3);
     }
 
     /**
@@ -89,9 +92,11 @@ public class Boss extends Enemy {
             attackCooldown.reset();
         }
 
-        if(isDead()){
+        if(isDead() && !keyDropped){
+            keyDropped = true;
             Key key = new Key(getOwnerArea(), getCurrentMainCellCoordinates(), -1);
             getOwnerArea().registerActor(key);
+            droppedKeySignal = key;
         }
 
         if (isImmune) {
@@ -103,6 +108,10 @@ public class Boss extends Enemy {
         if(bossAnimation.isCompleted()){
             bossAnimation.reset();
         }
+    }
+
+    public Logic droppedKeySignal() {
+        return droppedKeySignal;
     }
 
     private void fireBallSpell() {
@@ -125,12 +134,13 @@ public class Boss extends Enemy {
     private List<DiscreteCoordinates> fireballsPositions(Orientation bossOrientation, DiscreteCoordinates bossPosition) {
         List<DiscreteCoordinates> positions = new ArrayList<>(SIZE - 1);
 
-        switch (bossOrientation) {
+        int hole = RandomGenerator.nextInt(SIZE) + 1 ;
 
+        switch (bossOrientation) {
             case LEFT, RIGHT: {
                 int columnX = bossPosition.x;
                 for (int y = 1; y <= SIZE; y++) {
-                    if (y == bossPosition.y) continue; // trou = boss
+                    if (y == hole) continue; // trou aleatoire
                     positions.add(new DiscreteCoordinates(columnX, y));
                 }
                 break;
@@ -139,7 +149,7 @@ public class Boss extends Enemy {
             case UP, DOWN: {
                 int rowY = bossPosition.y;
                 for (int x = 1; x <= SIZE; x++) {
-                    if (x == bossPosition.x) continue; // trou = boss
+                    if (x == hole) continue; // trou aleatoire
                     positions.add(new DiscreteCoordinates(x, rowY));
                 }
                 break;

@@ -10,16 +10,20 @@
     import ch.epfl.cs107.icmaze.actor.enemies.LogMonster;
     import ch.epfl.cs107.icmaze.area.ICMazeArea;
     import ch.epfl.cs107.icmaze.area.maps.*;
+    import ch.epfl.cs107.icmaze.handler.DialogHandler;
     import ch.epfl.cs107.play.areagame.AreaGame;
     import ch.epfl.cs107.play.areagame.area.Area;
+    import ch.epfl.cs107.play.engine.actor.Dialog;
     import ch.epfl.cs107.play.io.FileSystem;
     import ch.epfl.cs107.play.math.DiscreteCoordinates;
     import ch.epfl.cs107.play.math.Orientation;
     import ch.epfl.cs107.play.math.Vector;
+    import ch.epfl.cs107.play.signal.logic.Logic;
+    import ch.epfl.cs107.play.window.Canvas;
     import ch.epfl.cs107.play.window.Keyboard;
     import ch.epfl.cs107.play.window.Window;
 
-    public class ICMaze extends AreaGame {
+    public class ICMaze extends AreaGame implements DialogHandler {
         private final String[] areas = {"icmaze/Spawn", "icmaze/Boss"};
         private int areaIndex;
         private ICMazePlayer player;
@@ -30,7 +34,7 @@
 
         // Initialisation des cles dans le spawn
         private Key key1;
-        private Key key2;
+        // private Key key2;
         private static final DiscreteCoordinates key1Position = new DiscreteCoordinates(6, 5);
         private static final DiscreteCoordinates key2Position = new DiscreteCoordinates(1, 2);
 
@@ -43,13 +47,32 @@
         private DiscreteCoordinates initialPickaxePosition =  new DiscreteCoordinates(5,4);
 
         // Declaration des Aires principales :
-        private Spawn spawn = new Spawn();
-        private BossArea bossArea = new BossArea();
+        private Spawn spawn;
+        private BossArea bossArea;
 
-
+        private Dialog activeDialog = null;
         /**
          * Add all the IC Maze areas
          */
+
+        public void setActiveDialog(Dialog dialog) {
+            activeDialog = dialog;
+        }
+
+        @Override
+        public void publish(Dialog dialog) {
+            setActiveDialog(dialog);
+        }
+
+        @Override
+        public void draw() {
+            super.draw(); // dessine l'aire courante
+
+            if (activeDialog != null) {
+                // Le Dialog veut un Canvas, pas un Window
+                activeDialog.draw(getWindow());
+            }
+        }
 
         private void teleportation(String destinationArea, DiscreteCoordinates destinationCoordinates){
             player.leaveArea(); // Quitte la current aire
@@ -62,7 +85,7 @@
         }
 
         private void createAreas() {
-//            generateHardCodedLevel();
+            //     generateHardCodedLevel();
             ICMazeArea[] generatedAreas = LevelGenerator.generateLine(this, 0); // 3 aires labyrinthiques
 
             // Ajouter toutes les aires au jeu
@@ -96,37 +119,49 @@
          */
         @Override
         public void update(float deltaTime) {
+            Keyboard keyboard = getWindow().getKeyboard();
+
+            if (keyboard.get(KeyBindings.RESET_GAME).isPressed()) {
+                end();
+                activeDialog = null;
+                begin(getWindow(), getFileSystem());
+                return;
+            }
+
+            // si dialogue actif: on ne met PAS à jour l'aire (freeze)
+            if (activeDialog != null) {
+                if (keyboard.get(KeyBindings.NEXT_DIALOG).isPressed()) {
+                    activeDialog.update(deltaTime);
+                    if (activeDialog.isCompleted()) {
+                        activeDialog = null;
+                    }
+                }
+                return;
+            }
             super.update(deltaTime);
 
-            // Variable s'initialise a l'interaction
             String destinationArea = player.getDestinationArea();
             DiscreteCoordinates destinationCoordinates = player.getDestinationCoordinates();
 
-            // Teleporte le player si interaction
             if (destinationCoordinates != null && destinationArea != null) {
                 teleportation(destinationArea, destinationCoordinates);
                 player.clearPortalToTraverse();
             }
 
-            // Reset si R est presse
-            Keyboard keyboard = getWindow().getKeyboard();
-            if (keyboard.get(KeyBindings.RESET_GAME).isPressed()) {
-                end();
-                begin(getWindow(), getFileSystem());
-            }
-
-            if(player.isDead()){
+            if (player.isDead()) {
                 end();
                 begin(getWindow(), getFileSystem());
             }
         }
+
 //        private void generateHardCodedLevel() {
 //
 //            // Création des aires
-//            SmallArea smallArea = new SmallArea(ICMazeArea.AreaPortals.E,ICMazeArea.AreaPortals.W, Integer.MAX_VALUE);
-//            MediumArea mediumArea = new MediumArea(ICMazeArea.AreaPortals.E,ICMazeArea.AreaPortals.W, Integer.MAX_VALUE);
-//            LargeArea largeArea = new LargeArea(ICMazeArea.AreaPortals.E,ICMazeArea.AreaPortals.W, Integer.MAX_VALUE);
-//
+//            spawn = new Spawn();
+//            SmallArea smallArea = new SmallArea(ICMazeArea.AreaPortals.E,ICMazeArea.AreaPortals.W, Integer.MAX_VALUE, Difficulty.HARD);
+//            MediumArea mediumArea = new MediumArea(ICMazeArea.AreaPortals.E,ICMazeArea.AreaPortals.W, Integer.MAX_VALUE, Difficulty.HARD);
+//            LargeArea largeArea = new LargeArea(ICMazeArea.AreaPortals.E,ICMazeArea.AreaPortals.W, Integer.MAX_VALUE, Difficulty.HARD);
+//            bossArea = new BossArea();
 //            spawn.lockPortalWithKey(ICMazeArea.AreaPortals.E, Integer.MAX_VALUE, smallArea.getTitle());
 //            spawn.setDestinationCoordinate(ICMazeArea.AreaPortals.E, smallArea.getEstPortalSpawn());
 //
@@ -188,8 +223,8 @@
 
             // Initialise les cles
             key1 = new Key(area, key1Position, Integer.MAX_VALUE);
-            key2 = new Key(area, key2Position, Integer.MAX_VALUE-1);
+//            key2 = new Key(area, key2Position, Integer.MAX_VALUE-1);
             area.registerActor(key1);
-            area.registerActor(key2);
+//            area.registerActor(key2);
         }
     }

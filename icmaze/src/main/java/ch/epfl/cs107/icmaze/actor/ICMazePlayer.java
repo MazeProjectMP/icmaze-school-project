@@ -71,6 +71,9 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
     private static final int IMMUNITY_DURATION = 40;
     private int immunityFrames = 0;
     private boolean isImmune = false;
+
+    private final Invertory inventory = new Invertory();
+
     /**
      * @param owner (Area) area to which the player belong
      * @param orientation (Orientation) the initial orientation of the player
@@ -119,6 +122,8 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
             if(isCellInteraction){
                 keysID.add(key.getIdentificator());
                 key.hide();
+                getInventory().add(Invertory.Item.KEY, 1);
+
             }
         }
 
@@ -172,6 +177,9 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
         destinationCoordinates = null;
     }
 
+    public Invertory getInventory() {
+        return inventory;
+    }
     /**
      * @param deltaTime elapsed time since last update, in seconds, non-negative
      */
@@ -246,6 +254,7 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
      */
     @Override
     public void draw(ch.epfl.cs107.play.window.Canvas canvas) {
+        inventory.draw(canvas); // UI par-dessus tout
         if (isImmune) {
             if (immunityFrames % 2 == 0) {
                 currentAnimation.draw(canvas);

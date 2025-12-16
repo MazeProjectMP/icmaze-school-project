@@ -14,8 +14,7 @@ public class FireProjectile extends Projectile {
 
     public FireProjectile(Area area, Orientation orientation, DiscreteCoordinates position) {
         super(area, orientation, position);
-        fireBallAnimation = new Animation("icmaze/magicFireProjectile", 4, 1, 1,
-                this, 32, 32, ANIMATION_DURATION/4, true);
+        fireBallAnimation = new Animation("icmaze/magicFireProjectile", 4, 1, 1, this, 32, 32, ANIMATION_DURATION/4, true);
     }
 
     @Override

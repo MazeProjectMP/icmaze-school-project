@@ -8,6 +8,7 @@ import ch.epfl.cs107.play.areagame.handler.AreaInteractionVisitor;
 import ch.epfl.cs107.play.engine.actor.Sprite;
 import ch.epfl.cs107.play.math.DiscreteCoordinates;
 import ch.epfl.cs107.play.math.Orientation;
+import ch.epfl.cs107.play.signal.logic.Logic;
 import ch.epfl.cs107.play.window.Canvas;
 
 import java.util.Collections;
@@ -20,13 +21,15 @@ import java.util.List;
  * and used to unlock specific elements of the maze.
  * </p>
  */
-public class Key extends CollectableAreaEntity implements Interactable {
+public class Key extends CollectableAreaEntity implements Interactable, Logic {
 
     private int identificator;
 
     private boolean isVisible ;
 
     private final Sprite key;
+
+    private boolean collected;
 
     /**
      * Creates a new key at the given position in the specified area.
@@ -39,6 +42,7 @@ public class Key extends CollectableAreaEntity implements Interactable {
         this.identificator = identificator;
         isVisible = true;
         key = new Sprite("icmaze/key", .75f, .75f, this);
+        collected = false;
     }
 
     /**
@@ -77,8 +81,19 @@ public class Key extends CollectableAreaEntity implements Interactable {
     public void hide() {
         if (isVisible) {
             isVisible = false;
+            collected = true;
             getOwnerArea().unregisterActor(this);
         }
+    }
+
+    @Override
+    public boolean isOn() {
+        return collected;
+    }
+
+    @Override
+    public boolean isOff() {
+        return !collected;
     }
 
     /**

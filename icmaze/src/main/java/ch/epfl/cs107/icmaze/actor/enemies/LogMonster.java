@@ -58,7 +58,7 @@ public class LogMonster extends PathFinderEnemy {
     private Health health;
     private int immunityFrames;
     private boolean isImmune;
-
+    private boolean forceToSleep; // Player won the game
 
     /**
      * Creates a new log monster.
@@ -124,6 +124,7 @@ public class LogMonster extends PathFinderEnemy {
                 new Vector(-0.5f, 0.25f), sleepingOrders,
                 1, 2, 2, 32, 32, true
         );
+        forceToSleep = false;
     }
 
     /**
@@ -188,21 +189,26 @@ public class LogMonster extends PathFinderEnemy {
         }
 
         /** updates state */
-        switch (currentState) {
-            case SLEEPING:
-                sleepingAnimation.update(deltaTime);
-                handleSleepingState(deltaTime);
-                break;
+        if(!forceToSleep) {
+            switch (currentState) {
+                case SLEEPING:
+                    sleepingAnimation.update(deltaTime);
+                    handleSleepingState(deltaTime);
+                    break;
 
-            case MOVING:
-                movingAnimation.update(deltaTime);
-                handleMovingState(deltaTime);
-                break;
+                case MOVING:
+                    movingAnimation.update(deltaTime);
+                    handleMovingState(deltaTime);
+                    break;
 
-            case TARGETING:
-                targetingAnimation.update(deltaTime);
-                handleTargetingState(deltaTime);
-                break;
+                case TARGETING:
+                    targetingAnimation.update(deltaTime);
+                    handleTargetingState(deltaTime);
+                    break;
+            }
+        }else{
+            currentState = State.SLEEPING;
+            sleepingAnimation.update(deltaTime);
         }
     }
     /**
@@ -233,16 +239,22 @@ public class LogMonster extends PathFinderEnemy {
         super.draw(canvas);
         if(!isVanishing()) {
            if(!isImmune || immunityFrames % 2 == 0){
-               switch (currentState) {
-                   case SLEEPING:
-                       sleepingAnimation.draw(canvas);
-                       break;
-                   case MOVING:
-                       movingAnimation.draw(canvas);
-                       break;
-                   case TARGETING:
-                       targetingAnimation.draw(canvas);
-                       break;
+               if(!forceToSleep) {
+                   switch (currentState) {
+                       case SLEEPING:
+                           sleepingAnimation.draw(canvas);
+                           break;
+                       case MOVING:
+                           movingAnimation.draw(canvas);
+                           break;
+                       case TARGETING:
+                           targetingAnimation.draw(canvas);
+                           break;
+                   }
+               }else{
+                   movingAnimation.reset();
+                   targetingAnimation.reset();
+                   sleepingAnimation.draw(canvas);
                }
            }
             if(isImmune){
@@ -338,6 +350,11 @@ public class LogMonster extends PathFinderEnemy {
             }
             stateTransitionCooldown.reset();
         }
+    }
+
+
+    public void sleep(){
+        forceToSleep = true;
     }
     /**
      * Gets the list of cells visible by the log monster.
