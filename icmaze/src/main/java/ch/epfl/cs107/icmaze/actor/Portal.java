@@ -15,12 +15,12 @@ import java.util.List;
 
 /**
  * Represents a portal in the game.
- *
- * A portal is an area entity that may be open, locked or invisible. It can optionally
- * require a key identifier to be opened and stores a destination area and coordinates
- * to allow traversal.
- *
+ * A portal allows the player to move from one area to another.
+ * It may be open, locked, or invisible, and can require a key
+ * to be activated. When used, it provides a destination area
+ * and destination coordinates.
  */
+
 public class Portal extends AreaEntity {
 
     private String areaName;

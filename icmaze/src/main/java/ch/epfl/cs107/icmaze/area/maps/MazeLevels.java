@@ -2,6 +2,7 @@ package ch.epfl.cs107.icmaze.area.maps;
 import ch.epfl.cs107.icmaze.Difficulty;
 import ch.epfl.cs107.icmaze.MazeGenerator;
 import ch.epfl.cs107.icmaze.RandomGenerator;
+import ch.epfl.cs107.icmaze.actor.enemies.Wizard;
 import ch.epfl.cs107.icmaze.actor.rocks.CommonRock;
 import ch.epfl.cs107.icmaze.actor.collectable.Key;
 import ch.epfl.cs107.icmaze.actor.enemies.LogMonster;
@@ -16,11 +17,21 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Represents a generic maze-based level in the game.
+ * <p>
+ * A {@code MazeLevels} instance generates a procedural maze, places walls,
+ * enemies and a key, and manages win conditions. It also maintains a navigation
+ * graph used by path-finding enemies.
+ * </p>
+ */
 public class MazeLevels extends ICMazeArea {
     private AreaPortals areaPortalEntry;
     private AreaPortals areaPortalExit;
     private int difficulty;
     private static final int MAX_NB_LOGMONSTER = 3;
+    private static final double PROBA_SPAWN_FIRST_WIZARD = 0.30;
+    private static final double PROBA_SPAWN_SECOND_WIZARD = 0.10;
 
     private int keyID;
 
@@ -30,7 +41,18 @@ public class MazeLevels extends ICMazeArea {
 
     private ArrayList<Rock> walls;
     private ArrayList<LogMonster> logMonsters;
+    private ArrayList<Wizard> wizards;
 
+    /**
+     * Creates a new maze level.
+     *
+     * @param areaPortalEntry (AreaPortals): entry portal configuration
+     * @param areaPortalExit  (AreaPortals): exit portal configuration
+     * @param difficulty      (int): difficulty level
+     * @param keyID           (int): identifier of the required key
+     * @param mapName         (String): name of the map
+     * @param sizeSide        (int): side length of the maze
+     */
     public MazeLevels(AreaPortals areaPortalEntry, AreaPortals areaPortalExit, int difficulty, int keyID, String mapName, int sizeSide) {
         super(mapName, sizeSide);
 
@@ -42,44 +64,95 @@ public class MazeLevels extends ICMazeArea {
 
         walls = new ArrayList<>();
         logMonsters = new ArrayList<>();
+        wizards = new ArrayList<>();
     }
 
+    /**
+     * Creates and initializes the area.
+     * Generates the maze, places the key and spawns enemies.
+     */
     @Override
     public void createArea() {
         super.createArea();
-        generateMaze(); // Generation de maze
+        generateMaze();
 
-        // Ajoute la cle
         key = new Key(this, randomSpawnPosition(), this.keyID);
         registerActor(key);
-        // Cree les monstres
         createMonsters();
     }
 
-    private void createMonsters(){
+    /** Creates all enemies in the maze. */
+    private void createMonsters() {
+        createLogMonsters();
+        createWizards();
+    }
+
+    /**
+     * Spawns log monsters depending on the difficulty level.
+     */
+    private void createLogMonsters() {
         double diffRatio = Math.min(1.0, (double) Difficulty.HARDEST / difficulty);
-        double addProbability = 0.25 + 0.60 * diffRatio; // Probabilite d'ajout
+        double addProbability = 0.25 + 0.60 * diffRatio;
 
         for (int i = 0; i < MAX_NB_LOGMONSTER; i++) {
-                if (RandomGenerator.rng.nextDouble() < addProbability) {
-                    // Etat initial
-                    LogMonster.State initialState = determineLogMonsterInitialState(diffRatio);
+            if (RandomGenerator.rng.nextDouble() < addProbability) {
 
-                    // Orientation initiale
-                    Orientation initialOrientation = Orientation.values()[RandomGenerator.nextInt(4)];
+                LogMonster.State initialState = determineLogMonsterInitialState(diffRatio);
+                Orientation initialOrientation = Orientation.values()[RandomGenerator.nextInt(4)];
+                DiscreteCoordinates initialPosition = randomSpawnPosition();
 
-                    // Position initiale
-                    DiscreteCoordinates initialPosition = randomSpawnPosition();
+                if (initialPosition == null) continue;
 
-                    // Niveau de vie maximal
-                    int maxHP = 3;
+                int maxHP = 3;
 
-                    LogMonster logMonster = new LogMonster(this, initialOrientation, initialPosition, maxHP, initialState, areaGraph, difficulty);
-                    logMonsters.add(logMonster);
-                    this.registerActor(logMonster);
-                }
+                LogMonster logMonster = new LogMonster(
+                        this,
+                        initialOrientation,
+                        initialPosition,
+                        maxHP,
+                        initialState,
+                        areaGraph,
+                        difficulty
+                );
+
+                logMonsters.add(logMonster);
+                registerActor(logMonster);
             }
+        }
     }
+
+    /**
+     * Spawns wizard enemies with fixed probabilities.
+     */
+    private void createWizards() {
+        // 30% le 1er
+        if (RandomGenerator.rng.nextDouble() < PROBA_SPAWN_FIRST_WIZARD) {
+            spawnOneWizard();
+
+            // 10% le 2e
+            if (RandomGenerator.rng.nextDouble() < PROBA_SPAWN_SECOND_WIZARD) {
+                spawnOneWizard();
+            }
+        }
+    }
+
+    /**
+     * Spawns a single wizard at a random valid position.
+     */
+    private void spawnOneWizard() {
+        DiscreteCoordinates initialPosition = randomSpawnPosition();
+
+        Wizard wizard = new Wizard(this, initialPosition, areaGraph);
+
+        wizards.add(wizard);
+        registerActor(wizard);
+    }
+
+    /**
+     * Updates the area logic.
+     * Ends the level when the winning condition is met.
+     * @param deltatime (float): elapsed time since last update
+     */
     @Override
     public void update(float deltatime){
         super.update(deltatime);
@@ -88,6 +161,10 @@ public class MazeLevels extends ICMazeArea {
         }
     }
 
+    /**
+     * Handles the end-of-level behavior.
+     * All enemies are neutralized and walls are destroyed.
+     */
     private void winGame(){
         for(LogMonster logMonster : logMonsters){
             logMonster.sleep();
@@ -95,9 +172,16 @@ public class MazeLevels extends ICMazeArea {
         for(Rock rock : walls){
             rock.breakWall();
         }
+        for (Wizard wizard : wizards){
+            wizard.vanish();
+        }
     }
 
-    // Determine l'Etat initiale du logMonster
+    /**
+     * Determines the initial state of a log monster based on difficulty.
+     * @param diffRatio (double): normalized difficulty ratio
+     * @return (LogMonster.State): initial monster state
+     */
     private LogMonster.State determineLogMonsterInitialState(double diffRatio) {
         double pTarget = 0.10 + 0.70 * diffRatio;
         double pRandom = 0.20;
@@ -114,6 +198,12 @@ public class MazeLevels extends ICMazeArea {
         }
     }
 
+    /**
+     * Checks whether a cell is not part of a portal spawn zone.
+     * @param x (int): x-coordinate
+     * @param y (int): y-coordinate
+     * @return (boolean): {@code true} if the cell is allowed
+     */
     private boolean notInSpawn(int x, int y) {
         int[] portalsX = {0, 0, 1, 1, getSizeSide(), getSizeSide(), getSizeSide()-1, getSizeSide()-1, getSizeSide()/2, getSizeSide()/2 - 1, getSizeSide()/2, getSizeSide()/2 - 1, getSizeSide()/2, getSizeSide()/2 - 1, getSizeSide()/2, getSizeSide()/2 - 1};
         int[] portalsY = {getSizeSide()/2, getSizeSide()/2 - 1, getSizeSide()/2, getSizeSide()/2 - 1, getSizeSide()/2, getSizeSide()/2 - 1, getSizeSide()/2, getSizeSide()/2 - 1, 0, 0, 1, 1, getSizeSide(), getSizeSide(), getSizeSide()-1, getSizeSide()-1};
@@ -194,14 +284,6 @@ public class MazeLevels extends ICMazeArea {
         }
         return null;
     }
-    /**
-     * @return the player's spawn position in the area
-     */
-    @Override
-    public DiscreteCoordinates getPlayerSpawnPosition() {
-        return new DiscreteCoordinates(0, 0);
-    }
-
 
     @Override
     public String getTitle() {

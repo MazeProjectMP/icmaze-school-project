@@ -20,6 +20,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 
+/**
+ * Represents a log monster enemy with multiple behavior states in the ICMaze game.
+ * <p>
+ * The {@code LogMonster} is a state-based enemy that alternates between sleeping,
+ * random movement, and target chasing. It can detect the player within a perception
+ * radius, transition between states based on the difficulty level, and temporarily
+ * becomes immune after taking damage. While targeting, it uses pathfinding on the
+ * {@link ch.epfl.cs107.play.areagame.AreaGraph} to choose the next orientation toward
+ * the player.
+ * </p>
+ */
+
 public class LogMonster extends PathFinderEnemy {
 
 
@@ -31,7 +43,7 @@ public class LogMonster extends PathFinderEnemy {
     private static final int perceptionRadius = 5;
     private static final int avance = 10;
 
-    private static final int IMMUNITY_DURATION_FRAMES = 20;
+    private static final int IMMUNITY_DURATION = 20;
 
 
     private Vector anchor;
@@ -58,6 +70,7 @@ public class LogMonster extends PathFinderEnemy {
     private Health health;
     private int immunityFrames;
     private boolean isImmune;
+
     private boolean forceToSleep; // Player won the game
 
     /**
@@ -84,18 +97,18 @@ public class LogMonster extends PathFinderEnemy {
         this.areaGraph = areaGraph;
         this.difficulty = difficulty;
 
-        /** cooldowns */
+        // cooldowns //
         this.reorientationCooldown = new Cooldown(0.75f);
         this.stateTransitionCooldown = new Cooldown(3.0f);
 
-        /** immunity */
+        // immunity //
         this.immunityFrames = 0;
         this.isImmune = false;
 
-        /** health */
+        // health //
         this.health = new Health(this, Transform.I.translated(0, 2f), maxHP, false);
 
-        /** animation data */
+        // animation data //
         this.anchor = new Vector(-0.5f, 0);
 
         this.targetingOrders = new Orientation[]{
@@ -128,10 +141,17 @@ public class LogMonster extends PathFinderEnemy {
     }
 
     /**
-     * Represents the possible states of the log monster.
+     * Enumeration of the possible behavior states of the log monster.
+     * <p>
+     * Each state defines a distinct behavior pattern:
+     *   {@link #SLEEPING}: the monster is inactive and only performs idle actions
+     *   {@link #MOVING}: the monster moves randomly within the area
+     *   {@link #TARGETING}: the monster actively pursues the player
+     * </p>
      */
 
     public enum State { SLEEPING, MOVING, TARGETING }
+
     /**
      * Handles interactions between the log monster and other entities.
      */
@@ -143,17 +163,17 @@ public class LogMonster extends PathFinderEnemy {
          */
         @Override
         public void interactWith(ICMazePlayer player, boolean isCellInteraction) {
-            /**if the monster is sleeping does nothing */
+            ///if the monster is sleeping does nothing
             if (currentState == State.SLEEPING) return;
 
             if (!isCellInteraction) {
-                /** cell in front of the  monster */
+                /// cell in front of the  monster
                 DiscreteCoordinates inFront = getCurrentMainCellCoordinates().jump(getOrientation().toVector());
 
                 if (player.getCurrentMainCellCoordinates().equals(inFront)) {
                         player.loseHP(1);
                 } else {
-                    /** keeps the player stored */
+                    /// keeps the player stored
                     target = player;
                 }
             }
@@ -180,7 +200,7 @@ public class LogMonster extends PathFinderEnemy {
     public void update(float deltaTime) {
         super.update(deltaTime);
 
-        /** evolution of immunity */
+        /// evolution of immunity
         if (isImmune) {
             immunityFrames -= deltaTime;
             if (immunityFrames <= 0) {
@@ -188,7 +208,7 @@ public class LogMonster extends PathFinderEnemy {
             }
         }
 
-        /** updates state */
+        /// updates state
         if(!forceToSleep) {
             switch (currentState) {
                 case SLEEPING:
@@ -221,7 +241,7 @@ public class LogMonster extends PathFinderEnemy {
         if (!isDead() && !isImmune && health.isOn()) {
             // Activer l'immunité
             isImmune = true;
-            immunityFrames = IMMUNITY_DURATION_FRAMES;
+            immunityFrames = IMMUNITY_DURATION;
             health.decrease(HP);
 
             super.loseHP(HP);
@@ -271,7 +291,7 @@ public class LogMonster extends PathFinderEnemy {
 
     private void handleSleepingState(float deltaTime) {
         if (reorientationCooldown.ready(deltaTime)) {
-            orientate(getOrientation().hisLeft()); // Tourne a gauche
+            orientate(getOrientation().hisLeft());
             reorientationCooldown.reset();
         }
         if (stateTransitionCooldown.ready(deltaTime)) {
@@ -362,7 +382,7 @@ public class LogMonster extends PathFinderEnemy {
      */
     @Override
     public List<DiscreteCoordinates> getFieldOfViewCells() {
-        /** returns cells in radius */
+        /// returns cells in radius
         List<DiscreteCoordinates> view = new ArrayList<>();
         DiscreteCoordinates current = getCurrentMainCellCoordinates();
         int radius = 5;
@@ -387,7 +407,8 @@ public class LogMonster extends PathFinderEnemy {
         if (path == null || path.isEmpty()) {
             return null;
         }
-        return path.poll();  /** first orientation in path */
+        /// first orientation in path
+        return path.poll();
 
     }
 }

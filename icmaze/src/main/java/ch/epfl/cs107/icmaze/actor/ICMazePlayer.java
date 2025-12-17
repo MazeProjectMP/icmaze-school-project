@@ -27,6 +27,16 @@ import java.util.Collections;
 import java.util.List;
 import static ch.epfl.cs107.play.math.Orientation.*;
 
+/**
+ * Represents the main player character in the ICMaze game.
+ * <p>
+ * The {@code ICMazePlayer} is a movable entity controlled via {@link KeyBindings}. The player
+ * can collect items (e.g. {@link Heart}, {@link Pickaxe}, {@link Key}, {@link RareItems}),
+ * interact with the environment (e.g. {@link Rock}, {@link Portal}), and fight enemies using
+ * the pickaxe attack state. The player has health points with temporary immunity after taking
+ * damage and stores collected resources in an {@link Inventory}.
+ * </p>
+ */
 public class ICMazePlayer extends MovableAreaEntity implements Interactor, Interactable {
 
     private final static KeyBindings.PlayerKeyBindings keys = KeyBindings.PLAYER_KEY_BINDINGS; // Initialise les touches du joueur
@@ -35,32 +45,32 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
     private PlayerState state = PlayerState.IDLE; // L'etat du personnage
     private final static int MOVE_DURATION = 5;
 
-    // Attributs d'animation :
+    /// Attributs d'animation :
     private final Vector anchor = new Vector(0,0);
     private final  Orientation[] orders = {DOWN, RIGHT, UP, LEFT};
     private final OrientedAnimation playerAnimation = new OrientedAnimation(prefix, ANIMATION_DURATION, this,anchor, orders, 4, 1, 2, 16, 32, true);
 
-    // Info du portail a traverser
+    /// Info du portail a traverser
     private String destinationArea;
     private DiscreteCoordinates destinationCoordinates;
 
-    // Points de vies
+    /// Points de vies
     private final int maxHP;
     private int currentHP;
     private boolean isDead = false;
 
-    // Pickaxe
+    /// Pickaxe
     private boolean isRock = false;
     private boolean hasAttacked = false;
 
-    // Pickaxe Animation
+    /// Pickaxe Animation
     private final Vector pickaxeAnchor = new Vector(-0.5f, 0);
     private final Orientation[] pickaxeOrders = {DOWN, UP, RIGHT, LEFT};
     private final static int PICKAXE_ANIMATION_DURATION = 5;
     private OrientedAnimation pickaxeAnimation = new OrientedAnimation(prefix + ".pickaxe", PICKAXE_ANIMATION_DURATION, this, pickaxeAnchor, pickaxeOrders, 4, 2, 2, 32, 32);
     private OrientedAnimation currentAnimation;
 
-    // health interaction
+    /// health interaction
     private Health health;
     private static final int IMMUNITY_DURATION = 40;
     private int immunityFrames = 0;
@@ -84,16 +94,23 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
         health = new Health(this, Transform.I.translated(0, 1.95f), this.currentHP, true);
     }
 
-    // Differents etats du personnage
-    public enum PlayerState {
+    /**
+     * Enumeration of the possible states of the player.
+     *   {@link #IDLE}: the player is not moving and not performing an action
+     *   {@link #MOVING}: the player is currently moving</li>
+     *   {@link #INTERACTING}: the player requests a view interaction (e.g. opening a portal)
+     *   {@link #ATTACKING_WITH_PICKAXE}: the player plays the pickaxe attack animation
+     */    public enum PlayerState {
         IDLE, // Le personnage est au repos
         MOVING, // Le personnage bouge
         INTERACTING, // Le personnage demande une interaction
         ATTACKING_WITH_PICKAXE, // Le personnage attaque avec la pioche
     }
 
+
     private class ICMazePlayerInteractionHandler implements ICMazeInteractionVisitor {
-        @Override
+
+         @Override
         public void interactWith(Heart heart, boolean isCellInteraction){
             if(isCellInteraction){
                 health.increase(1); // Gagner 1 point de vie
@@ -162,27 +179,50 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
 
     private final ICMazePlayerInteractionHandler handler = new ICMazePlayerInteractionHandler();
 
+    /**
+     * Forwards an interaction to the player interaction handler.
+     * @param other (Interactable): the interactable entity
+     * @param isCellInteraction (boolean): whether the interaction is a cell interaction
+     */
     public void interactWith(Interactable other, boolean isCellInteraction){
         other.acceptInteraction(handler, isCellInteraction);
     }
-
+    /**
+     * Gets the destination area set by a portal interaction.
+     * @return (String): the destination area name, or {@code null} if none is set
+     */
     public String getDestinationArea(){
         return destinationArea;
     }
+
+    /**
+     * Gets the destination coordinates set by a portal interaction.
+     * @return (DiscreteCoordinates): the destination coordinates, or {@code null} if none is set
+     */
     public DiscreteCoordinates getDestinationCoordinates() {
         return destinationCoordinates;
     }
-    // Reinitialise les infos du portail apres teleportation
-    public void clearPortalToTraverse() {
+
+    /**
+     * Clears the stored portal destination information after teleportation.
+     */    public void clearPortalToTraverse() {
         destinationArea = null;
         destinationCoordinates = null;
     }
 
+    /**
+     * Gets the player inventory.
+     * @return (Inventory): the player inventory
+     */
     public Inventory getInventory() {
         return inventory;
     }
+
     /**
-     * @param deltaTime elapsed time since last update, in seconds, non-negative
+     * Updates the player state.
+     * Handles movement, state transitions (idle/moving/interacting/attacking),
+     * immunity timing, and animation updates depending on inputs.
+     * @param deltaTime (float): time elapsed since last update
      */
     @Override
     public void update(float deltaTime) {
@@ -251,7 +291,10 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
     }
 
     /**
-     * @param canvas target, not null
+     * Draws the player on the canvas
+     * Draws the inventory UI, the current animation (blinking if immune),
+     * and the health bar if enabled.
+     * @param canvas (Canvas): the canvas to draw on
      */
     @Override
     public void draw(ch.epfl.cs107.play.window.Canvas canvas) {
@@ -271,6 +314,12 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
 
     }
 
+    /**
+     * Makes the player lose health points.
+     * Damage is applied only if the player is not currently immune. After taking damage,
+     * the player becomes temporarily immune. If health reaches zero, the player is marked dead.
+     * @param HP (int): amount of health points to remove
+     */
     public void loseHP(int HP) {
         if (!isImmune && health.isOn()) {
             health.decrease(HP);
@@ -286,45 +335,84 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
         }
     }
 
+    /**
+     * Indicates whether the player is dead.
+     * @return (boolean): {@code true} if the player is dead
+     */
     public boolean isDead(){
         return isDead;
     }
 
+    /**
+     * Indicates whether the player blocks the cell it occupies.
+     * @return (boolean): {@code true}, as the player occupies space on the grid
+     */
     @Override
     public boolean takeCellSpace() {
         return true;
     }
 
+    /**
+     * Indicates whether the player can be interacted with via cell interaction.
+     * @return (boolean): {@code true}
+     */
     @Override
     public boolean isCellInteractable() {
         return true;
     }
 
+    /**
+     * Indicates whether the player can be interacted with via view interaction.
+     * @return (boolean): {@code true}
+     */
     @Override
     public boolean isViewInteractable() {
         return true;
     }
 
+    /**
+     * Gets the list of cells currently occupied by the player.
+     * @return (List<DiscreteCoordinates>): a singleton list containing the current cell coordinates
+     */
     @Override
     public List<DiscreteCoordinates> getCurrentCells() {
         return Collections.singletonList(getCurrentMainCellCoordinates());
     }
 
+    /**
+     * Gets the cell immediately in front of the player.
+     * @return (List<DiscreteCoordinates>): a singleton list containing the cell in front of the player
+     */
     @Override
     public List<DiscreteCoordinates> getFieldOfViewCells() {
         return Collections.singletonList(getCurrentMainCellCoordinates().jump(getOrientation().toVector()));
     }
 
+    /**
+     * Indicates whether the player wants cell interactions.
+     * @return (boolean): {@code true}
+     */
     @Override
     public boolean wantsCellInteraction() {
         return true;
     }
 
+    /**
+     * Indicates whether the player wants view interactions.
+     * View interactions are enabled while interacting or attacking with the pickaxe.
+     * @return (boolean): {@code true} if the player requests view interactions
+     */
     @Override
     public boolean wantsViewInteraction() {
         // Retourne true pour INTERACTING et ATTACKING_WITH_PICKAXE
         return (state == PlayerState.INTERACTING || state == PlayerState.ATTACKING_WITH_PICKAXE);
     }
+
+    /**
+     * Accepts an interaction from an area interaction visitor.
+     * @param v (AreaInteractionVisitor): the interaction visitor
+     * @param isCellInteraction (boolean): whether the interaction is a cell interaction
+     */
     @Override
     public void acceptInteraction(AreaInteractionVisitor v, boolean isCellInteraction) {
         ((ICMazeInteractionVisitor) v).interactWith(this, isCellInteraction);
@@ -365,7 +453,7 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
     }
 
     /**
-     * Center the camera on the player
+     * Centers the camera on the player
      */
     public void centerCamera() {
         getOwnerArea().setViewCandidate(this);

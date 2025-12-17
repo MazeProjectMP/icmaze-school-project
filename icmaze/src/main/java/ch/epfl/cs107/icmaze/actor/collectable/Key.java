@@ -47,7 +47,6 @@ public class Key extends CollectableAreaEntity implements Interactable, Logic {
 
     /**
      * Gets the identifier of the key.
-     *
      * @return (int): the key identifier
      */
     public int getIdentificator() {
@@ -86,11 +85,19 @@ public class Key extends CollectableAreaEntity implements Interactable, Logic {
         }
     }
 
+    /**
+     * Indicates whether the element is in the active (collected) state.
+     * @return {@code true} if the item has been collected, {@code false} otherwise
+     */
     @Override
     public boolean isOn() {
         return collected;
     }
 
+    /**
+     * Indicates whether the element is in the inactive (not collected) state.
+     * @return {@code true} if the item has not been collected, {@code false} otherwise
+     */
     @Override
     public boolean isOff() {
         return !collected;

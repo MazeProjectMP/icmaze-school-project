@@ -10,6 +10,16 @@ import ch.epfl.cs107.play.math.*;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Represents a collectable heart item in the ICMaze game.
+ * <p>
+ * A {@code Heart} is a non-blocking collectable entity that restores or represents
+ * player health. It is displayed using a looping animation and can be interacted
+ * with through cell interactions. Once collected, the heart becomes invisible and
+ * is removed from the area.
+ * </p>
+ */
+
 
 public class Heart extends CollectableAreaEntity {
 
@@ -21,7 +31,6 @@ public class Heart extends CollectableAreaEntity {
 
     /**
      * Creates a new heart at the given position in the specified area.
-     *
      * @param currentArea (Area): the area where the heart is located
      * @param position (DiscreteCoordinates): the initial position of the heart
      */

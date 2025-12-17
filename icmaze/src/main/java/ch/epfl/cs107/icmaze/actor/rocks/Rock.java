@@ -18,6 +18,16 @@ import ch.epfl.cs107.play.window.Canvas;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Abstract base class for destructible rocks in the ICMaze game.
+ * <p>
+ * A {@code Rock} is a static obstacle that blocks movement while intact. It has health points,
+ * can take damage through interactions, becomes temporarily immune after being hit (blinking effect),
+ * and plays a vanishing animation when destroyed. Once the vanishing animation completes, the rock
+ * spawns loot by calling {@link #lootSpawn()} and is removed from the area by the concrete subclass.
+ * </p>
+ */
+
 public abstract class Rock extends AreaEntity {
     private final int maxHP;
     private int currentHP;
@@ -37,6 +47,13 @@ public abstract class Rock extends AreaEntity {
     private boolean isImmune ;
     private Sprite sprite;
 
+    /**
+     * Creates a new destructible rock at the given position in the specified area.
+     * @param area (Area): the area where the rock is located
+     * @param position (DiscreteCoordinates): the initial position of the rock
+     * @param maxHP (int): maximum health points of the rock
+     * @param spiteName (String): sprite name used to render the rock
+     */
     public Rock(Area area, DiscreteCoordinates position, int maxHP, String spiteName) {
         super(area, Orientation.LEFT, position);
 
@@ -73,8 +90,7 @@ public abstract class Rock extends AreaEntity {
     /**
      * Updates the rock state.
      * Handles immunity timing and vanishing animation. When the vanishing animation completes,
-     * the rock may spawn a {@link Heart}, updates the walkable graph of the current {@link MazeLevels},
-     * and unregisters itself from the area.
+     * {@link #lootSpawn()} is called to spawn loot and perform cleanup (graph update, unregister).
      * @param deltaTime (float): time elapsed since last update
      */
     @Override
@@ -95,9 +111,19 @@ public abstract class Rock extends AreaEntity {
             }
         }
     }
-
+    /**
+     * Spawns loot when the rock has been destroyed.
+     * This method is called once the vanishing animation is completed.
+     * Concrete subclasses must implement the loot spawning behavior, update
+     * the walkable maze graph if needed, and unregister the rock from the area.
+     */
     abstract void lootSpawn();
 
+    /**
+     * Breaks the rock immediately and starts the vanishing process.
+     * This method forces the rock health to zero, marks it as broken, and triggers
+     * the vanishing animation. Loot spawning will occur when the animation completes.
+     */
     public void breakWall(){
         currentHP = 0;
         isBroken = true;
@@ -142,7 +168,6 @@ public abstract class Rock extends AreaEntity {
 
     /**
      * Accepts an interaction from an area interaction visitor.
-     *
      * @param v (AreaInteractionVisitor): the interaction visitor
      * @param isCellInteraction (boolean): whether the interaction is a cell interaction
      */

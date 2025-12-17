@@ -32,6 +32,12 @@ public class CommonRock extends Rock {
         super(area, position, 3, "rock.2");
     }
 
+    /**
+     * Spawns loot when the rock is destroyed and removes it from the area.
+     * With a probability of 50%, a {@link Heart} is spawned at the rock's
+     * current position. The cell is then marked as walkable in the maze graph,
+     * and the rock is unregistered from the area.
+     */
     @Override
     public void lootSpawn(){
         if (RandomGenerator.rng.nextDouble() < 0.5) {

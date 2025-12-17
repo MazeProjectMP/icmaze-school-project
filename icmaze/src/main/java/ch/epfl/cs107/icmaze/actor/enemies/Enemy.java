@@ -19,14 +19,22 @@ import ch.epfl.cs107.play.window.Canvas;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Abstract base class for all enemy entities in the ICMaze game.
+ * <p>
+ * An {@code Enemy} is a movable and interactable entity with health points that can
+ * take damage and eventually disappear from the game area. Enemies block movement
+ * while alive, support view-based interactions, and play a vanishing animation when
+ * defeated. Concrete enemy types (such as bosses or monsters) extend this class to
+ * implement specific behaviors.
+ * </p>
+ */
 
 public abstract class Enemy extends MovableAreaEntity implements Interactable, Interactor {
 
     private final int maxHP;
     private int currentHP;
     private boolean isDead;
-    private Sprite sprite;
-
     private Animation vanishAnimation ;
     private boolean isVanishing ;
 
@@ -103,7 +111,7 @@ public abstract class Enemy extends MovableAreaEntity implements Interactable, I
     /**
      * Makes the enemy disappear.
      */
-    private void disappear() {
+    protected void disappear() {
         isDead = true;
         isVanishing = true;
     }
@@ -114,14 +122,6 @@ public abstract class Enemy extends MovableAreaEntity implements Interactable, I
      */
     protected boolean isVanishing() {
         return isVanishing;
-    }
-
-    /**
-     * Gets the vanishing animation.
-     * @return (Animation): the vanishing animation
-     */
-    public Animation vanishAnimation() {
-        return vanishAnimation;
     }
 
     /**

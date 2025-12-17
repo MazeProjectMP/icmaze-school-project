@@ -4,6 +4,15 @@ import ch.epfl.cs107.play.areagame.area.Area;
 import ch.epfl.cs107.play.engine.actor.Animation;
 import ch.epfl.cs107.play.math.DiscreteCoordinates;
 
+/**
+ * Represents a rare animated gold coin collectable in the ICMaze game.
+ * <p>
+ * A {@code GoldCoin} is a rare item that grants a high value when collected.
+ * It is displayed using a looping animation and is only rendered and updated
+ * while it is visible in the game area. This class extends {@link RareItems}
+ * and relies on the game engine's {@link Animation} system for visual feedback.
+ * </p>
+ */
 public class GoldCoin extends RareItems{
     private final static int ANIMATION_DURATION =24;
 

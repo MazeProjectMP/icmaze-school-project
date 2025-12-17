@@ -9,6 +9,15 @@ import ch.epfl.cs107.play.math.Orientation;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Abstract base class for enemies that use pathfinding and perception to track targets.
+ * <p>
+ * A {@code PathFinderEnemy} extends {@link Enemy} by adding a perception radius and
+ * path-based decision making. Such enemies are able to detect players within their
+ * field of view and compute the next orientation needed to reach a target using
+ * pathfinding logic defined in subclasses.
+ * </p>
+ */
 public abstract class PathFinderEnemy extends Enemy {
 
     private final int perceptionRadius;

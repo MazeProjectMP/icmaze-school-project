@@ -12,6 +12,15 @@ import java.awt.*;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Represents a high-value treasure collectable in the ICMaze game.
+ * <p>
+ * A {@code Treasure} is a rare and valuable item that can be collected by the player.
+ * It is rendered using a specific region of a sprite sheet and displays a small text
+ * label above it when visible. This class extends {@link RareItems} and inherits its
+ * interaction and visibility behavior.
+ * </p>
+ */
 
 public class Treasure extends RareItems {
 
@@ -20,7 +29,6 @@ public class Treasure extends RareItems {
     private RegionOfInterest treasureRegion;
 
     private final TextGraphics message;
-
     /**
      * Creates a new treasure at the given position in the specified area.
      *

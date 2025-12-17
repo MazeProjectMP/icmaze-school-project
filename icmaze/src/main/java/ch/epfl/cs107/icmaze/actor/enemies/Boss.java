@@ -18,19 +18,28 @@ import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.List;
 
-
+/**
+ * Represents the boss enemy of the ICMaze game.
+ * <p>
+ * The {@code Boss} is a powerful enemy with a large amount of health, special attack
+ * patterns, teleportation abilities, and temporary immunity after taking damage.
+ * Once activated, it periodically casts fire-based spells and changes position
+ * within a predefined arena. When defeated, the boss drops a key that can be used
+ * to progress further in the game.
+ * </p>
+ */
 public class Boss extends Enemy {
 
-    /** Duration of the boss animation. */
+    ///Duration of the boss animation.
     private static final int ANIMATION_DURATION = 60;
 
-    /** Anchor used to correctly position the boss animation. */
+    /// Anchor used to correctly position the boss animation.
     private final Vector anchor;
     private final Orientation[] orders;
     private final OrientedAnimation bossAnimation;
 
 
-    /** Health bar associated with the boss. */
+    ///Health bar associated with the boss.
     private Health health;
 
     private static final int IMMUNITY_DURATION_FRAMES = 20;
@@ -38,11 +47,13 @@ public class Boss extends Enemy {
     private boolean isImmune;
 
 
-    private boolean activated; // Activation du Boss
+    /// Activation du Boss
+    private boolean activated;
     private static final int SIZE = 8;
     private static final int MID = SIZE / 2 + 1;
     private static final DiscreteCoordinates CENTER = new DiscreteCoordinates(MID, MID);
-    HashMap<DiscreteCoordinates, Orientation> teleportationList = new HashMap<>(); // Puisqu'on a simplifier les lieux de teleportation, on peut utiliser une hashmap
+    /// Puisqu'on a simplifier les lieux de teleportation, on peut utiliser une hashmap
+    HashMap<DiscreteCoordinates, Orientation> teleportationList = new HashMap<>();
 
     private Cooldown attackCooldown;
     private boolean keyDropped = false;
@@ -110,9 +121,21 @@ public class Boss extends Enemy {
         }
     }
 
+    /**
+     * Provides a logic signal indicating whether the boss has dropped its key.
+     * @return a {@link Logic} signal that is {@code TRUE} once the key has been dropped,
+     * {@code FALSE} otherwise
+     */
     public Logic droppedKeySignal() {
         return droppedKeySignal;
     }
+
+    /**
+     * Casts a fireball spell in front of the boss.
+     * This attack spawns multiple {@link FireProjectile} instances in a straight line
+     * oriented according to the boss orientation. One random position in the line is
+     * left empty, creating a gap that the player can use to avoid the attack.
+     */
 
     private void fireBallSpell() {
         DiscreteCoordinates bossPosition = getCurrentMainCellCoordinates();
@@ -127,9 +150,19 @@ public class Boss extends Enemy {
         }
     }
 
+
     /**
-     * Calcule les 7 positions du spell.
-     * Le trou est la position du boss
+     * Computes the positions where the boss fireball spell will be spawned.
+     * <p>
+     * The spell generates {@code SIZE - 1} fireball positions aligned either
+     * horizontally or vertically depending on the boss orientation.
+     * One randomly chosen position is left empty, creating a gap that allows
+     * the player to avoid the attack.
+     * </p>
+     *
+     * @param bossOrientation (Orientation) the current orientation of the boss
+     * @param bossPosition (DiscreteCoordinates) the current position of the boss
+     * @return a list of discrete coordinates where fireballs will be spawned
      */
     private List<DiscreteCoordinates> fireballsPositions(Orientation bossOrientation, DiscreteCoordinates bossPosition) {
         List<DiscreteCoordinates> positions = new ArrayList<>(SIZE - 1);
@@ -162,8 +195,9 @@ public class Boss extends Enemy {
      * Makes the boss lose health points.
      * If the boss is not immune, damage is applied and temporary immunity
      * is activated.
-     * @param HP (int): amount of health points to remove
+     * @param HP (int)  : amount of health points to remove
      */
+
     @Override
     public void loseHP(int HP) {
         if (isDead()) return;
@@ -184,7 +218,12 @@ public class Boss extends Enemy {
         }
     }
 
-
+    /**
+     * Chooses a random teleport destination among the predefined teleportation cells.
+     * The current position is excluded from the candidates when the boss is not
+     * located at the center, to avoid teleporting to the same location.
+     * @return a randomly selected teleport destination coordinate
+     */
     private DiscreteCoordinates randomTeleportCoordinates() {
         HashMap<DiscreteCoordinates, Orientation> possiblePositions = new HashMap<>(teleportationList);
         if(!getCurrentMainCellCoordinates().equals(CENTER)) {
@@ -195,6 +234,12 @@ public class Boss extends Enemy {
 
         return randomCoordinate;
     }
+    /**
+     * Teleports the boss to a random predefined destination and updates its orientation.
+     * This method moves the boss by unregistering it from the area, updating its
+     * position and orientation, resetting its motion, and registering it again while
+     * updating the occupied cells accordingly.
+     */
 
     private void teleportRandomly() {
         DiscreteCoordinates randomCoordinate = randomTeleportCoordinates();

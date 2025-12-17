@@ -10,6 +10,15 @@ import ch.epfl.cs107.play.window.Canvas;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Base class for all collectable equipment items in the ICMaze game.
+ * <p>
+ * {@code Equipment} represents non-blocking collectable objects that occupy
+ * a single cell in an area and can be interacted with via cell interactions.
+ * This class provides default behavior for collectable entities and is
+ * intended to be extended by specific equipment types (e.g. keys, tools).
+ * </p>
+ */
 
 public class Equipment extends CollectableAreaEntity {
 

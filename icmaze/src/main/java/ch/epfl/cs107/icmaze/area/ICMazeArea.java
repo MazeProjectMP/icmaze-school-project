@@ -24,13 +24,7 @@ public abstract class ICMazeArea extends Area implements Logic {
     // Mise en place de l'Area Graph
     protected AreaGraph areaGraph = new AreaGraph();
 
-    private Logic solvedSignal = Logic.FALSE;
     private Logic winningSignal = Logic.FALSE;
-
-    /**
-     * @return the player's spawn position in the area
-     */
-    public abstract DiscreteCoordinates getPlayerSpawnPosition();
 
     public ICMazeArea(String titre, int sizeSide) {
         title = titre;
@@ -47,7 +41,7 @@ public abstract class ICMazeArea extends Area implements Logic {
     public final boolean isOn() { return winningSignal.isOn(); }
 
     @Override
-    public final boolean isOff() { return solvedSignal.isOff(); }
+    public final boolean isOff() { return !isOn(); }
     /**
      * Callback to initialise the instance of the area
      * @param window (Window): display context. Not null

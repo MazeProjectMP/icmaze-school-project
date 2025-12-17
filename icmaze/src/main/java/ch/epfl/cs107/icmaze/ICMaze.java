@@ -17,31 +17,9 @@
     import ch.epfl.cs107.play.window.Window;
 
     public class ICMaze extends AreaGame implements DialogHandler {
-        private final String[] areas = {"icmaze/Spawn", "icmaze/Boss"};
-        private int areaIndex;
+        private ICMazeArea[] areas;
         private ICMazePlayer player;
-
-        // Initialisation des collectables
-        private Heart heart;
-        private Pickaxe pickaxe;
-
-        // Initialisation des cles dans le spawn
-        private Key key1;
-        // private Key key2;
-        private static final DiscreteCoordinates key1Position = new DiscreteCoordinates(6, 5);
-        private static final DiscreteCoordinates key2Position = new DiscreteCoordinates(1, 2);
-
-        private CommonRock commonRock;
-        private static final DiscreteCoordinates rockPosition = new DiscreteCoordinates(3, 3);
-
-        // Positions initiales des entites de la map
-        private DiscreteCoordinates initialPostion = new DiscreteCoordinates(5,7);
-        private DiscreteCoordinates initialHeartPosition =  new DiscreteCoordinates(4,5);
-        private DiscreteCoordinates initialPickaxePosition =  new DiscreteCoordinates(5,4);
-
-        // Declaration des Aires principales :
-        private Spawn spawn;
-        private BossArea bossArea;
+        private DiscreteCoordinates initialPosition = new DiscreteCoordinates(5,7);
 
         private Dialog activeDialog = null;
         /**
@@ -60,7 +38,6 @@
         @Override
         public void draw() {
             super.draw(); // dessine l'aire courante
-
             if (activeDialog != null) {
                 // Le Dialog veut un Canvas, pas un Window
                 activeDialog.draw(getWindow());
@@ -79,16 +56,12 @@
 
         private void createAreas() {
             //     generateHardCodedLevel();
-            ICMazeArea[] generatedAreas = LevelGenerator.generateLine(this, 4); // 3 aires labyrinthiques
+            areas = LevelGenerator.generateLine(this, 4); // 3 aires labyrinthiques
 
             // Ajouter toutes les aires au jeu
-            for (ICMazeArea area : generatedAreas) {
+            for (ICMazeArea area : areas) {
                 addArea(area);
             }
-
-            // Garder les références pour l'initialisation
-            spawn = (Spawn) generatedAreas[0];
-            bossArea = (BossArea) generatedAreas[generatedAreas.length - 1];
         }
 
         /**
@@ -100,8 +73,7 @@
         public boolean begin(Window window, FileSystem fileSystem) {
             if (super.begin(window, fileSystem)) {
                 createAreas();
-                areaIndex = 0;
-                initArea(areas[areaIndex]);
+                initArea(areas[0].getTitle());
                 return true;
             }
             return false;
@@ -202,22 +174,9 @@
             ICMazeArea area = (ICMazeArea) setCurrentArea(areaKey, true);
 
             // Inititalise le main character
-            player = new ICMazePlayer(area, Orientation.UP, initialPostion, "player", 5);
-            player.enterArea(area, initialPostion);
+            player = new ICMazePlayer(area, Orientation.UP, initialPosition, "player", 5);
+            player.enterArea(area, initialPosition);
             player.centerCamera();
             player.getInventory().setWindowSize(getWindow().getWidth(), getWindow().getHeight());
-            // Inititalise la pioche
-            pickaxe = new Pickaxe(area, initialPickaxePosition);
-            area.registerActor(pickaxe);
-
-            // Inititalise le coeur
-            heart = new Heart(area, initialHeartPosition);
-            area.registerActor(heart);
-
-            // Initialise les cles
-            key1 = new Key(area, key1Position, Integer.MAX_VALUE);
-//            key2 = new Key(area, key2Position, Integer.MAX_VALUE-1);
-            area.registerActor(key1);
-//            area.registerActor(key2);
         }
     }

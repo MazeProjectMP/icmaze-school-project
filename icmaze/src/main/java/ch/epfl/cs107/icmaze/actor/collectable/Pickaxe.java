@@ -8,17 +8,24 @@ import ch.epfl.cs107.play.math.DiscreteCoordinates;
 import ch.epfl.cs107.play.math.Orientation;
 import ch.epfl.cs107.play.window.Canvas;
 
+/**
+ * Represents a collectable pickaxe tool in the ICMaze game.
+ * <p>
+ * A {@code Pickaxe} is a piece of equipment that can be collected by the player
+ * and used to interact with specific elements of the environment (such as rocks).
+ * It is rendered as a non-blocking entity, can be interacted with through cell
+ * interactions, and is removed from the area once collected.
+ * </p>
+ */
 
 public class Pickaxe extends Equipment {
 
     private final Sprite pickaxe;
 
-    /** Indicates whether the pickaxe is visible. */
     private boolean isVisible ;
 
     /**
      * Creates a new pickaxe at the given position in the specified area.
-     *
      * @param area (Area): the area where the pickaxe is located
      * @param position (DiscreteCoordinates): the initial position of the pickaxe
      */

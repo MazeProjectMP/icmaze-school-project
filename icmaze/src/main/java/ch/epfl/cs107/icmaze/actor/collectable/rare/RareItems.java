@@ -9,6 +9,15 @@ import ch.epfl.cs107.play.math.Orientation;
 
 import java.util.Collections;
 import java.util.List;
+/**
+ * Abstract base class for all rare collectable items in the ICMaze game.
+ * <p>
+ * {@code RareItems} represents high-value collectables that can be picked up by the player.
+ * Each rare item has an associated value, a visibility state, and occupies a single cell
+ * without blocking movement. Rare items support cell-based interactions via the
+ * {@link ICMazeInteractionVisitor} and are removed from the area once collected.
+ * </p>
+ */
 
 public abstract class RareItems extends CollectableAreaEntity {
     private int value;
@@ -76,7 +85,7 @@ public abstract class RareItems extends CollectableAreaEntity {
     /**
      * Accepts an interaction from an area interaction visitor.
      * @param v (AreaInteractionVisitor): the interaction visitor
-     * @param isCellInteraction (boolean): whether the interaction is a cell interaction
+     * @param isCellInteraction (boolean): indicates whether the interaction is a cell interaction
      */
     @Override
     public void acceptInteraction(AreaInteractionVisitor v, boolean isCellInteraction) {
