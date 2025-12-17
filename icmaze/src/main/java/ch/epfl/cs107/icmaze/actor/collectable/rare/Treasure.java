@@ -31,7 +31,6 @@ public class Treasure extends RareItems {
     private final TextGraphics message;
     /**
      * Creates a new treasure at the given position in the specified area.
-     *
      * @param currentArea (Area): the area where the treasure is located
      * @param position (DiscreteCoordinates): the initial position of the treasure
      */

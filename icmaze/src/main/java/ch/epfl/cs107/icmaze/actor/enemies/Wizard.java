@@ -146,7 +146,7 @@ public class Wizard extends PathFinderEnemy {
     public void update(float deltaTime) {
         super.update(deltaTime);
 
-        /// evolution of immunity
+        /// Evolution of immunity
         if (isImmune) {
             immunityFrames -= deltaTime;
             if (immunityFrames <= 0) {
@@ -154,7 +154,7 @@ public class Wizard extends PathFinderEnemy {
             }
         }
 
-        // Si le joueur est aligné -> ATTACKING, sinon MOVING
+        /// Attack if aligned, else move
         Orientation shootingOrientation = getShootingOrientationIfPossible();
         if (shootingOrientation != null) {
             currentState = State.ATTACKING;
@@ -240,18 +240,17 @@ public class Wizard extends PathFinderEnemy {
      * @return (Orientation): the shooting orientation, or {@code null} if shooting is not possible
      */
     private Orientation getShootingOrientationIfPossible() {
-        if (targetPlayer == null) return null;
-
+        if (targetPlayer != null) {
         DiscreteCoordinates wizardPosition = getCurrentMainCellCoordinates();
         DiscreteCoordinates playerPosition = targetPlayer.getCurrentMainCellCoordinates();
 
         int deltaX = playerPosition.x - wizardPosition.x;
         int deltaY = playerPosition.y - wizardPosition.y;
 
-        /// range
+        /// Range
         if (Math.max(Math.abs(deltaX), Math.abs(deltaY)) > SHOOT_RANGE) return null;
 
-        /// alignement
+        /// Setting the position
         Orientation direction;
         if (wizardPosition.x == playerPosition.x) {
             direction = (deltaY > 0) ? Orientation.UP : Orientation.DOWN;
@@ -261,7 +260,7 @@ public class Wizard extends PathFinderEnemy {
             return null;
         }
 
-        /// ligne de vue (pas d'obstacle entre les deux)
+        /// Line of sight (no obstacle between the two)
         DiscreteCoordinates current = wizardPosition;
         while (!current.equals(playerPosition)) {
             current = current.jump(direction.toVector());
@@ -270,6 +269,8 @@ public class Wizard extends PathFinderEnemy {
         }
 
         return direction;
+        }
+        return null;
     }
 
     /**

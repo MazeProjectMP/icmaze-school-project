@@ -31,7 +31,6 @@ public class FireProjectile extends Projectile {
      * and the fireball animation. The animation is looped continuously.
      * @param deltaTime (float) time elapsed since the last update
      */
-
     @Override
     public void update(float deltaTime) {
         super.update(deltaTime);

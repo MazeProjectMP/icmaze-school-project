@@ -1,11 +1,14 @@
 package ch.epfl.cs107.icmaze;
 
-
+/**
+ * Defines difficulty levels for maze generation.
+ */
 public final class Difficulty {
     private Difficulty() {
     }
-
-    // Number represents "tightness" of the maximum room subdivision. A lower number effectively makes the room harder
+    /**
+     * Difficulty constants.
+     */
     public static final int EASIEST = 10;
     public static final int EASY = 8;
     public static final int MEDIUM = 6;

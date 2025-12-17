@@ -71,7 +71,7 @@ public class LogMonster extends PathFinderEnemy {
     private int immunityFrames;
     private boolean isImmune;
 
-    private boolean forceToSleep; // Player won the game
+    private boolean forceToSleep; /// Player won the game
 
     /**
      * Creates a new log monster.
@@ -97,18 +97,18 @@ public class LogMonster extends PathFinderEnemy {
         this.areaGraph = areaGraph;
         this.difficulty = difficulty;
 
-        // cooldowns //
+        /// Cooldowns
         this.reorientationCooldown = new Cooldown(0.75f);
         this.stateTransitionCooldown = new Cooldown(3.0f);
 
-        // immunity //
+        /// Immunity
         this.immunityFrames = 0;
         this.isImmune = false;
 
-        // health //
+        /// Health
         this.health = new Health(this, Transform.I.translated(0, 2f), maxHP, false);
 
-        // animation data //
+        /// Animation data
         this.anchor = new Vector(-0.5f, 0);
 
         this.targetingOrders = new Orientation[]{
@@ -163,17 +163,17 @@ public class LogMonster extends PathFinderEnemy {
          */
         @Override
         public void interactWith(ICMazePlayer player, boolean isCellInteraction) {
-            ///if the monster is sleeping does nothing
+            ///If the monster is sleeping does nothing
             if (currentState == State.SLEEPING) return;
 
             if (!isCellInteraction) {
-                /// cell in front of the  monster
+                /// Cell in front of the  monster
                 DiscreteCoordinates inFront = getCurrentMainCellCoordinates().jump(getOrientation().toVector());
 
                 if (player.getCurrentMainCellCoordinates().equals(inFront)) {
                         player.loseHP(1);
                 } else {
-                    /// keeps the player stored
+                    /// Keeps the player stored
                     target = player;
                 }
             }
@@ -200,7 +200,7 @@ public class LogMonster extends PathFinderEnemy {
     public void update(float deltaTime) {
         super.update(deltaTime);
 
-        /// evolution of immunity
+        /// Evolution of immunity
         if (isImmune) {
             immunityFrames -= deltaTime;
             if (immunityFrames <= 0) {
@@ -208,7 +208,7 @@ public class LogMonster extends PathFinderEnemy {
             }
         }
 
-        /// updates state
+        /// Updates state
         if(!forceToSleep) {
             switch (currentState) {
                 case SLEEPING:
@@ -239,7 +239,7 @@ public class LogMonster extends PathFinderEnemy {
     @Override
     public void loseHP(int HP) {
         if (!isDead() && !isImmune && health.isOn()) {
-            // Activer l'immunité
+            /// Activer l'immunité
             isImmune = true;
             immunityFrames = IMMUNITY_DURATION;
             health.decrease(HP);
@@ -310,12 +310,12 @@ public class LogMonster extends PathFinderEnemy {
     private void handleMovingState(float deltaTime) {
         if (reorientationCooldown.ready(deltaTime)) {
             Orientation newOrientation = Orientation.values()[RandomGenerator.rng.nextInt(4)];
-            orientate(newOrientation); // Change aleatoirement d'orientation
+            orientate(newOrientation); /// Randomly changes orientation
             move(avance);
             reorientationCooldown.reset();
         }
         if (stateTransitionCooldown.ready(deltaTime)) {
-            // Verifie si une cible est en vue
+            /// CHecks weether a target is in view
             if (target != null && isTargetInView()) {
                 double pTransition = (double) Difficulty.HARDEST / difficulty;
                 if (RandomGenerator.rng.nextDouble() < pTransition) {
@@ -336,7 +336,7 @@ public class LogMonster extends PathFinderEnemy {
         DiscreteCoordinates targetPos = target.getCurrentMainCellCoordinates();
         DiscreteCoordinates currentPos = getCurrentMainCellCoordinates();
 
-        /** checks wether the target is visible in the radius */
+        ///Checks whether the target is visible in the radius
         return Math.abs(targetPos.x - currentPos.x) <= perceptionRadius &&
                 Math.abs(targetPos.y - currentPos.y) <= perceptionRadius;
     }
@@ -345,7 +345,7 @@ public class LogMonster extends PathFinderEnemy {
      * @param deltaTime (float): time elapsed since last update
      */
     public void handleTargetingState(float deltaTime) {
-        /** checks wether the target is still  visible  */
+        /// Checks whether the target is still  visible
         if (target == null || !isTargetInView()) {
             target = null;
             currentState = State.MOVING;
@@ -382,7 +382,7 @@ public class LogMonster extends PathFinderEnemy {
      */
     @Override
     public List<DiscreteCoordinates> getFieldOfViewCells() {
-        /// returns cells in radius
+        /// Returns cells in radius
         List<DiscreteCoordinates> view = new ArrayList<>();
         DiscreteCoordinates current = getCurrentMainCellCoordinates();
         int radius = 5;
@@ -407,7 +407,7 @@ public class LogMonster extends PathFinderEnemy {
         if (path == null || path.isEmpty()) {
             return null;
         }
-        /// first orientation in path
+        /// First orientation in path
         return path.poll();
 
     }

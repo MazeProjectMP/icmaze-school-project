@@ -117,16 +117,16 @@ public abstract class Projectile extends MovableAreaEntity implements Interactor
             return;
         }
 
-        /// tente d’avancer d’un pas dès qu’il n’est pas déjà en déplacement
+        /// Tries to make a step as soon as he is not already moving
         if (!isDisplacementOccurs() && remainingDistance > 0) {
             int duration = Math.max(1, MOVE_DURATION / SPEED);
             move(duration);
 
-            /// si le move n’a pas démarré => bloqué => stop avant distance max
+            /// If the move did not start, the entity is blocked, blocks movement before max distance
             if (!isDisplacementOccurs()) {
                 stop();
             } else {
-                remainingDistance -= 1; // 1 pas = 1 unité de distance
+                remainingDistance -= 1; /// One step is equivalent to one distance unity
             }
         }
     }

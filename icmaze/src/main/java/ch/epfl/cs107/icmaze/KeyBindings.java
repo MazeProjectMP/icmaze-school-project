@@ -11,34 +11,23 @@ import static ch.epfl.cs107.play.window.Keyboard.DOWN;
 import static ch.epfl.cs107.play.window.Keyboard.LEFT;
 import static ch.epfl.cs107.play.window.Keyboard.RIGHT;
 
+
 /**
- * Interface KeyboardConfig
- * Définition des touches de déplacement des deux joueurs ainsi que d'autres
- * actions globales dans le jeu.
+ * Defines all keyboard bindings used in the game.
  */
 public final class KeyBindings {
 
     /**
-     * Touches utilisées pour le joueur rouge.
+     * Key bindings for the player.
      */
     public static final PlayerKeyBindings PLAYER_KEY_BINDINGS = new PlayerKeyBindings(UP, LEFT, DOWN, RIGHT, SPACE, E);
-
-    /**
-     * Touche pour passer au dialogue suivant.
-     */
+    ///Key used to advance to the next dialog.
     public static final int NEXT_DIALOG = ENTER;
-    /**
-     * Touche pour réinitialiser le jeu.
-     */
+    ///Key used to reset the game.
     public static final int RESET_GAME = R;
-    /**
-     * Touche pour réinitialiser la zone.
-     */
+    ///Key used to reset the area.
     public static final int PAUSE_GAME = P;
-
-    /**
-     * Touche pour se téléporter à la salle du BOSS
-     */
+    /// Key used to teleport to the boss room.
     public static final int BOSS_ROOM = B;
 
     private KeyBindings() {
@@ -46,14 +35,14 @@ public final class KeyBindings {
     }
 
     /**
-     * Touches utilisées pour un joueur
+     * Key bindings for a player.
      *
-     * @param up         Pour le déplacement vers le haut
-     * @param left       Pour le déplacement vers la gauche
-     * @param down       Pour le déplacement vers le bas
-     * @param right      Pour le déplacement vers la droite
-     * @param pickaxe    Pour utiliser la pioche
-     * @param interact   Pour interagir à distance
+     * @param up movement up
+     * @param left movement left
+     * @param down movement down
+     * @param right movement right
+     * @param pickaxe use pickaxe
+     * @param interact interact with entities
      */
     public record PlayerKeyBindings(int up, int left, int down, int right, int pickaxe, int interact) {
     }

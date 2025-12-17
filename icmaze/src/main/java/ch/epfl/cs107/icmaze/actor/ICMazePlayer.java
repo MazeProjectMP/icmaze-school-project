@@ -40,21 +40,21 @@ import static ch.epfl.cs107.play.math.Orientation.*;
 public class ICMazePlayer extends MovableAreaEntity implements Interactor, Interactable {
 
     private final static KeyBindings.PlayerKeyBindings keys = KeyBindings.PLAYER_KEY_BINDINGS; // Initialise les touches du joueur
-    private final static String prefix = "icmaze/player"; // Lien de l'image
+    private final static String prefix = "icmaze/player"; /// Image link
     private final static int ANIMATION_DURATION = 1 ;
-    private PlayerState state = PlayerState.IDLE; // L'etat du personnage
+    private PlayerState state = PlayerState.IDLE;
     private final static int MOVE_DURATION = 5;
 
-    /// Attributs d'animation :
+    /// Animation attributes
     private final Vector anchor = new Vector(0,0);
     private final  Orientation[] orders = {DOWN, RIGHT, UP, LEFT};
     private final OrientedAnimation playerAnimation = new OrientedAnimation(prefix, ANIMATION_DURATION, this,anchor, orders, 4, 1, 2, 16, 32, true);
 
-    /// Info du portail a traverser
+    /// Portal
     private String destinationArea;
     private DiscreteCoordinates destinationCoordinates;
 
-    /// Points de vies
+    /// Life points
     private final int maxHP;
     private int currentHP;
     private boolean isDead = false;
@@ -70,7 +70,7 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
     private OrientedAnimation pickaxeAnimation = new OrientedAnimation(prefix + ".pickaxe", PICKAXE_ANIMATION_DURATION, this, pickaxeAnchor, pickaxeOrders, 4, 2, 2, 32, 32);
     private OrientedAnimation currentAnimation;
 
-    /// health interaction
+    /// Health interaction
     private Health health;
     private static final int IMMUNITY_DURATION = 40;
     private int immunityFrames = 0;
@@ -113,7 +113,7 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
          @Override
         public void interactWith(Heart heart, boolean isCellInteraction){
             if(isCellInteraction){
-                health.increase(1); // Gagner 1 point de vie
+                health.increase(1); ///Wins 1 life point
                 currentHP += 1;
                 isImmune = true;
                 immunityFrames = IMMUNITY_DURATION;
@@ -227,12 +227,11 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
     @Override
     public void update(float deltaTime) {
         super.update(deltaTime);
-        /** changes state of player if he's not moving or attacking */
-
+    /// changes state of player if he's not moving or attacking
         if(!isDisplacementOccurs() && !state.equals(PlayerState.ATTACKING_WITH_PICKAXE)){
             state = PlayerState.IDLE;
         }
-        /** dealing with immunity */
+        /// dealing with immunity
         if (isImmune) {
             immunityFrames -= deltaTime;
             if (immunityFrames <= 0) {
@@ -251,11 +250,11 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
                 moveIfPressed(Orientation.UP, keyboard.get(keys.up()));
                 moveIfPressed(Orientation.RIGHT, keyboard.get(keys.right()));
                 moveIfPressed(Orientation.DOWN, keyboard.get(keys.down()));
-                /** changes state if player moves  */
+                ///changes state if player moves
                 if(isDisplacementOccurs()){
                     state = PlayerState.MOVING;
                 }
-                /**  does animation if the player is moving  */
+                ///does animation if the player is moving
 
                 if(state == PlayerState.MOVING){
                     playerAnimation.update(deltaTime);
@@ -306,7 +305,7 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
         } else {
             currentAnimation.draw(canvas);
         }
-        /** draws animation  */
+        /// Draws animation
 
         if (health.isOn()) {
             health.draw(canvas);

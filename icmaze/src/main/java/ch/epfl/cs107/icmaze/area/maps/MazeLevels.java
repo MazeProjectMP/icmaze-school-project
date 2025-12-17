@@ -125,11 +125,11 @@ public class MazeLevels extends ICMazeArea {
      * Spawns wizard enemies with fixed probabilities.
      */
     private void createWizards() {
-        // 30% le 1er
+        /// 30 percent for the first
         if (RandomGenerator.rng.nextDouble() < PROBA_SPAWN_FIRST_WIZARD) {
             spawnOneWizard();
 
-            // 10% le 2e
+            /// 10 percent for the second
             if (RandomGenerator.rng.nextDouble() < PROBA_SPAWN_SECOND_WIZARD) {
                 spawnOneWizard();
             }
@@ -190,11 +190,11 @@ public class MazeLevels extends ICMazeArea {
         double r = RandomGenerator.rng.nextDouble();
 
         if (r < pSleeping) {
-            return LogMonster.State.SLEEPING; // Etat dormant
+            return LogMonster.State.SLEEPING; /// Sleeping state
         } else if (r < pSleeping + pRandom) {
-            return LogMonster.State.MOVING; // Etat de deplacement aleatoire
+            return LogMonster.State.MOVING; ///State of random movement
         } else {
-            return LogMonster.State.TARGETING; // Etat de chasse
+            return LogMonster.State.TARGETING; /// Chasing state
         }
     }
 
@@ -215,8 +215,11 @@ public class MazeLevels extends ICMazeArea {
         return true;
     }
 
+    /**
+     * Adds a walkable cell to the area graph.
+     * @param c the coordinates of the cell to add
+     */
     public void addWalkableCellToGraph(DiscreteCoordinates c) {
-        // voisins déjà "walkable" = ceux qui existent dans le graph
         boolean left  = areaGraph.nodeExists(new DiscreteCoordinates(c.x - 1, c.y));
         boolean up    = areaGraph.nodeExists(new DiscreteCoordinates(c.x, c.y + 1));
         boolean right = areaGraph.nodeExists(new DiscreteCoordinates(c.x + 1, c.y));
@@ -225,13 +228,16 @@ public class MazeLevels extends ICMazeArea {
         areaGraph.addNode(c, left, up, right, down);
     }
 
-
+    /**
+     * Generates the maze layout of the area.
+     * Walkable cells are added to the graph and walls are filled with rocks.
+     */
     private void generateMaze(){
         int size = getSizeSide();
         int[][] maze = MazeGenerator.createMaze(size, size, Difficulty.HARDEST);
         boolean[][] chemins = new boolean[size + 2][size + 2]; // +2 pour les bords
 
-        // Mise en place des murs du maze, si c'est un mur on on place un rocher, sinon c'est un chemin
+        /// Placement of walls in the maze, choice between a rock or a path
         for(int y = 0; y < getSizeSide() ; y++){
             for(int x = 0; x < getSizeSide() ; x++){
                 if(maze[y][x] == 1 && notInSpawn(x+1,y+1)){
@@ -253,13 +259,13 @@ public class MazeLevels extends ICMazeArea {
             }
         }
 
-        // Determination des connexions autour d'une cellule pratiquable
+        ///Determine connections around each walkable cell
         for (int x = 0; x < size + 2; x++) {
             for (int y = 0; y < size + 2; y++) {
                 if (chemins[x][y]) {
                     DiscreteCoordinates coord = new DiscreteCoordinates(x, y);
 
-                    // Verification dans des connexions dans les 4 directions
+                    /// Check connections in the four cardinal directions
                     boolean left = (x > 0) && chemins[x - 1][y];
                     boolean up = (y < size + 1) && chemins[x][y + 1];
                     boolean right = (x < size + 1) && chemins[x + 1][y];
@@ -271,10 +277,18 @@ public class MazeLevels extends ICMazeArea {
         }
     }
 
+    /**
+     * Returns the identifier of the key associated with this area.
+     * @return the key identifier
+     */
     public int getKeyID() {
         return keyID;
     }
 
+    /**
+     * Returns a random walkable position in the area.
+     * @return a random spawn position, or null if none is available
+     */
     private DiscreteCoordinates randomSpawnPosition(){
         List<DiscreteCoordinates> possiblePositions = new ArrayList<>(areaGraph.keySet());  // Copie profonde des differentes possitions possibles
 
@@ -285,6 +299,10 @@ public class MazeLevels extends ICMazeArea {
         return null;
     }
 
+    /**
+     * Returns the title of the area.
+     * @return the area title
+     */
     @Override
     public String getTitle() {
         return "icmaze/" + mapName + "/" + String.valueOf(keyID);

@@ -26,7 +26,6 @@ public class Inventory {
     private final List<Integer> keyIds;
     private int money;
     private double width, height;
-    // UI
     private final InventoryGraphic inventoryGraphic;
 
     /**
@@ -34,7 +33,6 @@ public class Inventory {
      * The inventory starts with no pickaxe, no keys, and zero money.
      */
     public Inventory() {
-        /// compteur initial : 0
         hasPickaxe = false;
         keyIds = new ArrayList<>();
         money = 0;
@@ -192,7 +190,7 @@ public class Inventory {
          * Initializes inventory HUD graphics.
          */
         public InventoryGraphic() {
-            /// BAR
+            /// Bar
             bar = new ImageGraphics(ResourcePath.getSprite("icmaze/inventory_bg"), 1, 1);
             bar.setDepth(BAR_DEPTH);
 
@@ -302,7 +300,7 @@ public class Inventory {
             /// Slots (top)
             float ySlot = yBar + barHeight - PAD_Y - SLOT_SIZE;
 
-            /// compteurs (bottom) -> centered + dropped with 0.25f
+            /// Modification of counters position
             float yTextCenter = yBar + PAD_Y + (COUNTER_ZONE * 0.5f) - COUNTER_DROP;
 
             for (int i = 0; i < 3; i++) {

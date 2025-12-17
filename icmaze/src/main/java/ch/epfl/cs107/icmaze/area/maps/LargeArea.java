@@ -1,5 +1,7 @@
 package ch.epfl.cs107.icmaze.area.maps;
 
+import ch.epfl.cs107.icmaze.Size;
+
 /**
  * Represents a large maze area.
  * <p>
@@ -18,6 +20,6 @@ public class LargeArea extends MazeLevels {
      * @param difficulty      (int): difficulty level of the area
      */
     public LargeArea(AreaPortals areaPortalEntry, AreaPortals areaPortalExit, int keyID, int difficulty) {
-        super(areaPortalEntry, areaPortalExit, difficulty, keyID, "LargeArea", 32);
+        super(areaPortalEntry, areaPortalExit, difficulty, keyID, "LargeArea", Size.LARGE);
     }
 }

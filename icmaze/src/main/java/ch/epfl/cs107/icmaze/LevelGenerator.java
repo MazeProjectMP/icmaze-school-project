@@ -20,8 +20,8 @@ public final class LevelGenerator {
     private static final ICMazeArea.AreaPortals[] FORWARD_DIRECTIONS = { ICMazeArea.AreaPortals.N, ICMazeArea.AreaPortals.E, ICMazeArea.AreaPortals.S};
 
     /**
-     * Generates a linear level: Spawn + numberOfMazeAreas labyrinth areas + BossArea.
-     * If numberOfMazeAreas == 0, BossArea is connected directly after Spawn.
+     * Generates a linear level of Spawn and numberOfMazeAreas labyrinth areas and BossArea.
+     * If numberOfMazeAreas is 0, BossArea is connected directly after Spawn.
      * @param game              the game instance
      * @param numberOfMazeAreas number of labyrinth areas to generate
      * @return an array of areas in loading order (Spawn ... BossArea)
@@ -32,7 +32,7 @@ public final class LevelGenerator {
         List<ICMazeArea> areas = new ArrayList<>(length + 2);
         Set<DiscreteCoordinates> occupiedPositions = new HashSet<>();
 
-        Spawn spawn = new Spawn(game); // Prend le dialogue du Jeu en parametre
+        Spawn spawn = new Spawn(game); /// Takes the dialogs game dialog as a parameter
         areas.add(spawn);
 
         DiscreteCoordinates currentPosition = new DiscreteCoordinates(0, 0);
@@ -49,7 +49,7 @@ public final class LevelGenerator {
 
             ICMazeArea.AreaPortals exitDirection;
             if (i == 0) {
-                exitDirection = ICMazeArea.AreaPortals.E; // Par defaut le portail a partir du spawn est EST
+                exitDirection = ICMazeArea.AreaPortals.E; /// Default setting, initial portal from spawn is East
             } else {
                 exitDirection = chooseForwardFreeDirection(currentPosition, occupiedPositions);
             }
@@ -72,7 +72,7 @@ public final class LevelGenerator {
 
         ICMazeArea.AreaPortals bossExitDirection;
         if (length == 0) {
-            bossExitDirection = ICMazeArea.AreaPortals.E; // Si on vient directement du SPAWN
+            bossExitDirection = ICMazeArea.AreaPortals.E; ///If we come from Spawn
         } else {
             bossExitDirection = chooseForwardFreeDirection(currentPosition, occupiedPositions);
         }
@@ -81,22 +81,22 @@ public final class LevelGenerator {
         ICMazeArea.AreaPortals bossEntryDirection = getOppositeDirection(bossExitDirection);
         BossArea bossArea = new BossArea();
         connectAreasWithKey(previousArea, bossExitDirection, bossArea, bossEntryDirection, exitKeyId);
-        bossArea.lockPortalWithKey(bossEntryDirection, -1, previousArea.getTitle()); // Piege fatal
+        bossArea.lockPortalWithKey(bossEntryDirection, -1, previousArea.getTitle()); ///Trap.
         areas.add(bossArea);
         occupiedPositions.add(bossPosition);
 
-        Logic bossSolved = bossArea; // BossArea est un Logic
+        Logic bossSolved = bossArea; ///BossArea is a logic.
 
         for (ICMazeArea area : areas) {
             if (area != bossArea) {
-                area.setWinningSignal(bossSolved); // spawn + labyrinthes => ON quand bossArea ON
+                area.setWinningSignal(bossSolved); /// Spawn and maze are on whenever bossArea is on.
             }
         }
         return areas.toArray(new ICMazeArea[0]);
     }
 
     /**
-     * Chooses a free direction among {N, E, S} such that the target position is not occupied.
+     * Chooses a free direction among {N, E, S} such that the nextPosition is not occupied.
      * @param currentPosition   current grid position in the fictitious reference
      * @param occupiedPositions set of already used positions
      * @return a valid forward direction
@@ -104,8 +104,8 @@ public final class LevelGenerator {
     private static ICMazeArea.AreaPortals chooseForwardFreeDirection(DiscreteCoordinates currentPosition, Set<DiscreteCoordinates> occupiedPositions) {
         List<ICMazeArea.AreaPortals> candidates = new ArrayList<>(3);
         for (ICMazeArea.AreaPortals direction : FORWARD_DIRECTIONS) {
-            DiscreteCoordinates target = getNextPosition(currentPosition, direction);
-            if (!occupiedPositions.contains(target)) {
+            DiscreteCoordinates nextPosition = getNextPosition(currentPosition, direction);
+            if (!occupiedPositions.contains(nextPosition)) {
                 candidates.add(direction);
             }
         }

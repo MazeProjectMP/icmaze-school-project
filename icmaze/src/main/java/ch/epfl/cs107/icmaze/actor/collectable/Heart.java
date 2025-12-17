@@ -19,8 +19,6 @@ import java.util.List;
  * is removed from the area.
  * </p>
  */
-
-
 public class Heart extends CollectableAreaEntity {
 
     private final static int ANIMATION_DURATION =24;

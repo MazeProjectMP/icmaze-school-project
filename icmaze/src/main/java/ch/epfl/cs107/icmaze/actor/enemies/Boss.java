@@ -81,10 +81,10 @@ public class Boss extends Enemy {
 
         activated = false;
 
-        teleportationList.put(new DiscreteCoordinates(MID, SIZE), Orientation.DOWN); // En haut
-        teleportationList.put(new DiscreteCoordinates(MID, 1), Orientation.UP); // En bas
-        teleportationList.put(new DiscreteCoordinates(1, MID), Orientation.RIGHT); // A gauche
-        teleportationList.put(new DiscreteCoordinates(SIZE, MID), Orientation.LEFT); // A droite
+        teleportationList.put(new DiscreteCoordinates(MID, SIZE), Orientation.DOWN);
+        teleportationList.put(new DiscreteCoordinates(MID, 1), Orientation.UP);
+        teleportationList.put(new DiscreteCoordinates(1, MID), Orientation.RIGHT);
+        teleportationList.put(new DiscreteCoordinates(SIZE, MID), Orientation.LEFT);
 
         attackCooldown = new Cooldown(3);
     }
@@ -173,7 +173,7 @@ public class Boss extends Enemy {
             case LEFT, RIGHT: {
                 int columnX = bossPosition.x;
                 for (int y = 1; y <= SIZE; y++) {
-                    if (y == hole) continue; // trou aleatoire
+                    if (y == hole) continue; ///Random hole
                     positions.add(new DiscreteCoordinates(columnX, y));
                 }
                 break;
@@ -182,7 +182,7 @@ public class Boss extends Enemy {
             case UP, DOWN: {
                 int rowY = bossPosition.y;
                 for (int x = 1; x <= SIZE; x++) {
-                    if (x == hole) continue; // trou aleatoire
+                    if (x == hole) continue; ///Random hole
                     positions.add(new DiscreteCoordinates(x, rowY));
                 }
                 break;

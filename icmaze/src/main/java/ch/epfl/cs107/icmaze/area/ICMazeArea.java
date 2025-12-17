@@ -10,22 +10,31 @@ import ch.epfl.cs107.play.math.Orientation;
 import ch.epfl.cs107.play.signal.logic.Logic;
 import ch.epfl.cs107.play.window.Window;
 
+/**
+ * Base class for all ICMaze areas.
+ * Handles portals, area graph, and winning logic.
+ */
 public abstract class ICMazeArea extends Area implements Logic {
     private String title;
     public final static float DEFAULT_SCALE_FACTOR = 11.f;
-    private int sizeSide; // Longueur du cote de l'aire
+    private int sizeSide; ///Length of the side of the area
 
-    // Declaration des 4 portails
+    /// Initialising the 4 portals
     private Portal portalWest;
     private Portal portalEast;
     private Portal portalNorth;
     private Portal portalSouth;
 
-    // Mise en place de l'Area Graph
+    /// Placing the area graph
     protected AreaGraph areaGraph = new AreaGraph();
 
     private Logic winningSignal = Logic.FALSE;
 
+    /**
+     * Creates a maze area.
+     * @param titre the area title
+     * @param sizeSide the side length of the area
+     */
     public ICMazeArea(String titre, int sizeSide) {
         title = titre;
         this.sizeSide = sizeSide;
@@ -33,13 +42,25 @@ public abstract class ICMazeArea extends Area implements Logic {
     }
 
 
+    /**
+     * Sets the winning signal of the area.
+     * @param signal the logic signal triggering victory
+     */
     public final void setWinningSignal(Logic signal) {
         winningSignal = (signal == null) ? Logic.FALSE : signal;
     }
 
+    /**
+     * Indicates whether the area is completed.
+     * @return true if the winning condition is met
+     */
     @Override
     public final boolean isOn() { return winningSignal.isOn(); }
 
+    /**
+     * Indicates whether the area is not completed.
+     * @return true if the winning condition is not met
+     */
     @Override
     public final boolean isOff() { return !isOn(); }
     /**
@@ -58,6 +79,9 @@ public abstract class ICMazeArea extends Area implements Logic {
         return false;
     }
 
+    /**
+     * Enumeration of the four portal directions.
+     */
     public enum AreaPortals {
         N(Orientation.UP),
         W(Orientation.LEFT),
@@ -72,6 +96,9 @@ public abstract class ICMazeArea extends Area implements Logic {
         }
     }
 
+    /**
+     * Initializes the four portals of the area.
+     */
     public void initPortals(){
         portalNorth  = new Portal(this ,  Orientation.UP.opposite(), new DiscreteCoordinates(sizeSide / 2 , sizeSide + 1));
         portalSouth  = new Portal(this ,  Orientation.DOWN.opposite(), new DiscreteCoordinates(sizeSide / 2, 0));
@@ -79,15 +106,27 @@ public abstract class ICMazeArea extends Area implements Logic {
         portalWest = new Portal(this ,  Orientation.LEFT.opposite(), new DiscreteCoordinates(0, sizeSide / 2));
     }
 
+    /**
+     * Creates and registers the area content.
+     */
     protected void createArea(){
-        registerPortals(); // Enregistrer les portails dans l'aire
-        registerTheme(); // Enregistrer les backgrounds
+        registerPortals(); /// Register the portals
+        registerTheme(); /// Register the background
     }
 
+    /**
+     * Returns the side length of the area.
+     * @return the area side size
+     */
     public int getSizeSide() {
         return sizeSide;
     }
 
+    /**
+     * Opens a portal toward a destination area.
+     * @param portal the portal to open
+     * @param destinationAreaName the target area name
+     */
     public void openPortal(AreaPortals portal, String destinationAreaName) {
         switch (portal) {
             case W -> portalWest.unlock(destinationAreaName);
@@ -97,6 +136,12 @@ public abstract class ICMazeArea extends Area implements Logic {
         }
     }
 
+    /**
+     * Locks a portal with a key.
+     * @param portal the portal to lock
+     * @param keyId the required key identifier
+     * @param destinationAreaName the target area name
+     */
     public void lockPortalWithKey(AreaPortals portal, int keyId, String destinationAreaName) {
         switch (portal) {
             case W -> portalWest.lock(keyId, destinationAreaName);
@@ -106,6 +151,11 @@ public abstract class ICMazeArea extends Area implements Logic {
         }
     }
 
+    /**
+     * Sets the destination coordinates of a portal.
+     * @param portal the portal to configure
+     * @param destinationCoordinates the destination coordinates
+     */
     public void setDestinationCoordinate(AreaPortals portal, DiscreteCoordinates destinationCoordinates){
         switch (portal) {
             case W -> portalWest.setDestinationCoordinates(destinationCoordinates);
@@ -116,24 +166,45 @@ public abstract class ICMazeArea extends Area implements Logic {
     }
 
 
-
+    /**
+     * Returns the spawn position when entering from the west portal.
+     * @return west portal spawn coordinates
+     */
     public DiscreteCoordinates getWestPortalSpawn() {
         return new DiscreteCoordinates(sizeSide, sizeSide / 2);
     }
+    /**
+     * Returns the spawn position when entering from the east portal.
+     * @return east portal spawn coordinates
+     */
     public DiscreteCoordinates getEstPortalSpawn() {
         return new DiscreteCoordinates(1, sizeSide / 2);
     }
+    /**
+     * Returns the spawn position when entering from the north portal.
+     * @return north portal spawn coordinates
+     */
     public DiscreteCoordinates getNorthPortalSpawn(){
         return new DiscreteCoordinates(sizeSide/2, 1);
     }
+    /**
+     * Returns the spawn position when entering from the south portal.
+     * @return north portal spawn coordinates
+     */
     public DiscreteCoordinates getSouthPortalSpawn() {
         return new DiscreteCoordinates(sizeSide / 2, sizeSide);
     }
 
+    /**
+     * Registers the background of the area.
+     */
     private void registerTheme() {
         registerActor(new Background(this, title));
     }
 
+    /**
+     * Registers all portals in the area.
+     */
     private void registerPortals(){
         this.registerActor(portalWest);
         this.registerActor(portalEast);

@@ -1,5 +1,6 @@
 package ch.epfl.cs107.icmaze.area.maps;
 
+import ch.epfl.cs107.icmaze.Size;
 import ch.epfl.cs107.icmaze.actor.collectable.Heart;
 import ch.epfl.cs107.icmaze.actor.collectable.Key;
 import ch.epfl.cs107.icmaze.actor.collectable.Pickaxe;
@@ -11,9 +12,12 @@ import ch.epfl.cs107.icmaze.handler.DialogHandler;      // ✅ AJOUT
 import ch.epfl.cs107.play.engine.actor.Dialog;          // ✅ AJOUT
 import ch.epfl.cs107.play.math.DiscreteCoordinates;
 
+/**
+ * Spawn area of the game.
+ * This area introduces the player to basic collectables and displays a welcome dialog.
+ */
 public class Spawn extends ICMazeArea {
     private final static String NAME = "SmallArea";
-    private static final int SIDE_SIZE = 8;
 
     private final DialogHandler dialogHandler;
     private boolean welcomeShown = false;
@@ -21,21 +25,26 @@ public class Spawn extends ICMazeArea {
     private boolean showTreasure;
 
 
-    // Initialisation des collectables
+    /// collectables
     private Treasure treasure;
     private Heart heart;
     private Pickaxe pickaxe;
     private Crystal crystal;
     private Key key;
 
-    // Positions initiales des entites de la map
+    /// Initial positions of entities on the map
     private static final DiscreteCoordinates HEART_POSITION =  new DiscreteCoordinates(4,5);
     private static final DiscreteCoordinates PICKAXE_POSITION =  new DiscreteCoordinates(5,4);
     private static final DiscreteCoordinates KEY_POSITION = new DiscreteCoordinates(6, 5);
     private static final DiscreteCoordinates TREASURE_POSITION = new DiscreteCoordinates(2, 4);
     private static final DiscreteCoordinates CRYSTAL_POSITION = new DiscreteCoordinates(3, 4);
+
+    /**
+     * Creates the spawn area.
+     * @param dialogHandler handler used to display dialogs
+     */
     public Spawn(DialogHandler dialogHandler) {
-        super(NAME, SIDE_SIZE);
+        super(NAME, Size.SMALL);
         this.dialogHandler = dialogHandler;
 
         showTreasure = false;
@@ -46,16 +55,22 @@ public class Spawn extends ICMazeArea {
         key = new Key(this, KEY_POSITION, Integer.MAX_VALUE);
     }
 
+    /**
+     * Registers initial collectable entities in the area.
+     */
     private void onStart(){
-        // Inititalise la pioche
         this.registerActor(pickaxe);
 
-        // Inititalise le coeur
         this.registerActor(heart);
 
-        // Initialise les cles
         this.registerActor(key);
     }
+    /**
+     * Updates the spawn area.
+     * Displays the welcome dialog and spawns the treasure when activated.
+     *
+     * @param deltaTime elapsed time since last update
+     */
     @Override
     public void update(float deltaTime) {
         super.update(deltaTime);
@@ -76,6 +91,10 @@ public class Spawn extends ICMazeArea {
         }
     }
 
+    /**
+     * Returns the title of the spawn area.
+     * @return the area title
+     */
     @Override
     public String getTitle() {
         return "icmaze/Spawn";

@@ -1,5 +1,6 @@
 package ch.epfl.cs107.icmaze.area.maps;
 
+import ch.epfl.cs107.icmaze.Size;
 import ch.epfl.cs107.icmaze.actor.enemies.Boss;
 import ch.epfl.cs107.icmaze.area.ICMazeArea;
 import ch.epfl.cs107.play.math.DiscreteCoordinates;
@@ -13,14 +14,13 @@ import ch.epfl.cs107.play.signal.logic.Logic;
 
 public class BossArea extends ICMazeArea {
     private static final String NAME = "SmallArea";
-    private static final int SIDE_SIZE = 8;
     Boss boss;
 
     /**
      * Creates the boss area with a fixed size.
      */
     public BossArea(){
-        super(NAME, SIDE_SIZE);
+        super(NAME, Size.SMALL);
     }
 
     @Override
@@ -31,7 +31,7 @@ public class BossArea extends ICMazeArea {
         boss = new Boss(this, Orientation.LEFT, new DiscreteCoordinates(5,5), 8);
         registerActor(boss);
 
-        /// Winning condition: boss defeated and key collected
+        /// Winning condition, boss defeated and key collected
         setWinningSignal(new Logic() {
 
             /**

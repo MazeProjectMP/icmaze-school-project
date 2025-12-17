@@ -16,6 +16,10 @@
     import ch.epfl.cs107.play.window.Keyboard;
     import ch.epfl.cs107.play.window.Window;
 
+    /**
+     * Main game class for ICMaze.
+     * Manages areas, player transitions, and dialog display.
+     */
     public class ICMaze extends AreaGame implements DialogHandler {
         private ICMazeArea[] areas;
         private ICMazePlayer player;
@@ -23,42 +27,55 @@
 
         private Dialog activeDialog = null;
         /**
-         * Add all the IC Maze areas
+         * Sets the currently displayed dialog.
+         * @param dialog the dialog to display (can be null)
          */
-
         public void setActiveDialog(Dialog dialog) {
             activeDialog = dialog;
         }
 
+        /**
+         * Displays the given dialog (DialogHandler implementation).
+         * @param dialog the dialog to display
+         */
         @Override
         public void publish(Dialog dialog) {
             setActiveDialog(dialog);
         }
 
+        /**
+         * Draws the current area and the active dialog if any.
+         */
         @Override
         public void draw() {
-            super.draw(); // dessine l'aire courante
+            super.draw();
             if (activeDialog != null) {
-                // Le Dialog veut un Canvas, pas un Window
                 activeDialog.draw(getWindow());
             }
         }
 
+        /**
+         * Teleports the player to another area at the given coordinates.
+         * @param destinationArea the destination area title
+         * @param destinationCoordinates the destination coordinates in the destination area
+         */
         private void teleportation(String destinationArea, DiscreteCoordinates destinationCoordinates){
-            player.leaveArea(); // Quitte la current aire
+            player.leaveArea();
 
-            setCurrentArea(destinationArea, false); // Change l'aire courante
+            setCurrentArea(destinationArea, false);
 
-            player.enterArea(getCurrentArea() , destinationCoordinates);// Teleporte le personnage dans l'aire
+            player.enterArea(getCurrentArea() , destinationCoordinates); /// Makes the player travel to the area
 
-            player.centerCamera(); // Centre la camera sur le personnage
+            player.centerCamera(); ///Centers the camera on the player
         }
 
+        /**
+         * Creates and registers all game areas.
+         */
         private void createAreas() {
-            //     generateHardCodedLevel();
             areas = LevelGenerator.generateLine(this, 4); // 3 aires labyrinthiques
 
-            // Ajouter toutes les aires au jeu
+            /// adds all areas in the game
             for (ICMazeArea area : areas) {
                 addArea(area);
             }
@@ -93,7 +110,7 @@
                 return;
             }
 
-            // si dialogue actif: on ne met PAS à jour l'aire (freeze)
+            /// If dialog is on, it doesn't update the area
             if (activeDialog != null) {
                 if (keyboard.get(KeyBindings.NEXT_DIALOG).isPressed()) {
                     activeDialog.update(deltaTime);
@@ -118,49 +135,18 @@
                 begin(getWindow(), getFileSystem());
             }
         }
-
-//        private void generateHardCodedLevel() {
-//
-//            // Création des aires
-//            spawn = new Spawn();
-//            SmallArea smallArea = new SmallArea(ICMazeArea.AreaPortals.E,ICMazeArea.AreaPortals.W, Integer.MAX_VALUE, Difficulty.HARD);
-//            MediumArea mediumArea = new MediumArea(ICMazeArea.AreaPortals.E,ICMazeArea.AreaPortals.W, Integer.MAX_VALUE, Difficulty.HARD);
-//            LargeArea largeArea = new LargeArea(ICMazeArea.AreaPortals.E,ICMazeArea.AreaPortals.W, Integer.MAX_VALUE, Difficulty.HARD);
-//            bossArea = new BossArea();
-//            spawn.lockPortalWithKey(ICMazeArea.AreaPortals.E, Integer.MAX_VALUE, smallArea.getTitle());
-//            spawn.setDestinationCoordinate(ICMazeArea.AreaPortals.E, smallArea.getEstPortalSpawn());
-//
-//            smallArea.openPortal(ICMazeArea.AreaPortals.W, spawn.getTitle());
-//            smallArea.lockPortalWithKey(ICMazeArea.AreaPortals.E, smallArea.getKeyID(),mediumArea.getTitle());
-//            smallArea.setDestinationCoordinate(ICMazeArea.AreaPortals.W, spawn.getWestPortalSpawn());
-//            smallArea.setDestinationCoordinate(ICMazeArea.AreaPortals.E, mediumArea.getEstPortalSpawn());
-//
-//            mediumArea.openPortal(ICMazeArea.AreaPortals.W, smallArea.getTitle());
-//            mediumArea.lockPortalWithKey(ICMazeArea.AreaPortals.E, mediumArea.getKeyID(), largeArea.getTitle());
-//            mediumArea.setDestinationCoordinate(ICMazeArea.AreaPortals.W, smallArea.getWestPortalSpawn());
-//            mediumArea.setDestinationCoordinate(ICMazeArea.AreaPortals.E, largeArea.getEstPortalSpawn());
-//
-//            largeArea.openPortal(ICMazeArea.AreaPortals.W, mediumArea.getTitle());
-//            largeArea.lockPortalWithKey(ICMazeArea.AreaPortals.E,  largeArea.getKeyID(), bossArea.getTitle());
-//            largeArea.setDestinationCoordinate(ICMazeArea.AreaPortals.W, mediumArea.getWestPortalSpawn());
-//            largeArea.setDestinationCoordinate(ICMazeArea.AreaPortals.E, bossArea.getEstPortalSpawn());
-//
-//            bossArea.lockPortalWithKey(ICMazeArea.AreaPortals.W, -1,largeArea.getTitle());
-//            bossArea.setDestinationCoordinate(ICMazeArea.AreaPortals.W, largeArea.getWestPortalSpawn());
-//
-//            // Ajout des aires au jeu
-//            addArea(spawn);
-//            addArea(smallArea);
-//            addArea(mediumArea);
-//            addArea(largeArea);
-//            addArea(bossArea);
-//        }
-
+        /**
+         * Ends the game (called when the game is stopped).
+         */
         @Override
         public void end() {
 
         }
 
+        /**
+         * Returns the game title.
+         * @return the game title
+         */
         @Override
         public String getTitle() {
             return "ICMaze";
@@ -172,8 +158,6 @@
          */
         private void initArea(String areaKey) {
             ICMazeArea area = (ICMazeArea) setCurrentArea(areaKey, true);
-
-            // Inititalise le main character
             player = new ICMazePlayer(area, Orientation.UP, initialPosition, "player", 5);
             player.enterArea(area, initialPosition);
             player.centerCamera();

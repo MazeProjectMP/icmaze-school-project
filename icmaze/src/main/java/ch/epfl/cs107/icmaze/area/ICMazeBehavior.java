@@ -4,7 +4,10 @@ import ch.epfl.cs107.play.areagame.actor.Interactable;
 import ch.epfl.cs107.play.areagame.area.AreaBehavior;
 import ch.epfl.cs107.play.areagame.handler.AreaInteractionVisitor;
 import ch.epfl.cs107.play.window.Window;
-
+/**
+ * Behavior class for ICMaze areas.
+ * Builds the area grid from a behavior image and defines cell interactions.
+ */
 public class ICMazeBehavior extends AreaBehavior {
     /**
      * Default ICMazeBehavior Constructor
@@ -25,7 +28,10 @@ public class ICMazeBehavior extends AreaBehavior {
     }
 
 
-
+    /**
+     * Enumeration of ICMaze cell types.
+     * Each type defines whether the cell is walkable.
+     */
     public enum ICMazeCellType {
         //https://stackoverflow.com/questions/25761438/understanding-bufferedimage-getrgb-output-values
         NULL(0, false),
@@ -41,6 +47,11 @@ public class ICMazeBehavior extends AreaBehavior {
         final int type;
         final boolean isWalkable;
 
+        /**
+         * Returns the cell type corresponding to a pixel color.
+         * @param type the RGB value
+         * @return the corresponding cell type, or NULL if unknown
+         */
         ICMazeCellType(int type, boolean isWalkable) {
             this.type = type;
             this.isWalkable = isWalkable;
@@ -51,15 +62,12 @@ public class ICMazeBehavior extends AreaBehavior {
                 if (ict.type == type)
                     return ict;
             }
-            // When you add a new color, you can print the int value here before assign it to a type
+            /// Prints the int value of a new color before assign it to a type
             System.out.println(type);
             return NULL;
         }
     }
 
-    /**
-     * Cell adapted to the ICMaze game
-     */
     public class ICMazeCell extends Cell {
         /// Type of the cell following the enum
         private final ICMazeCellType type;
@@ -76,23 +84,33 @@ public class ICMazeBehavior extends AreaBehavior {
             this.type = type;
         }
 
+        /**
+         * Indicates whether an entity can leave this cell.
+         * @param entity the interacting entity
+         * @return true if the entity can leave the cell
+         */
         @Override
         protected boolean canLeave(Interactable entity) {
             return true;
         }
 
 
+        /**
+         * Indicates whether an entity can enter this cell.
+         * @param entity the interacting entity
+         * @return true if the entity can enter the cell
+         */
        @Override
         protected boolean canEnter(Interactable entity) {
-            // Si la cellule n'est pas marchable dessus, personne ne peut rentrer
+            /// If the cell is not walkable, no one can enter
            if (!type.isWalkable){
                return false;
            }
-           // Si l'entite est traversable. il peut rentrer
+           /// If the entity is traversable, he can enter
            if (!entity.takeCellSpace()) {
                return !entity.takeCellSpace();
            }
-           // Si l'entite n'est pas traversable, verifier qu'aucune entite est presente
+           /// Checks whether there are other entities in the cell
             for (Interactable other : entities){
                 if (other.takeCellSpace()){
                     return false;
@@ -101,16 +119,29 @@ public class ICMazeBehavior extends AreaBehavior {
             return true;
         }
 
+        /**
+         * Indicates whether the cell supports cell interactions.
+         * @return true if the cell is interactable
+         */
         @Override
         public boolean isCellInteractable() {
             return true;
         }
 
+        /**
+         * Indicates whether the cell supports view interactions.
+         * @return true if the cell is view interactable
+         */
         @Override
         public boolean isViewInteractable() {
             return false;
         }
 
+        /**
+         * Accepts an interaction visitor.
+         * @param v the interaction visitor
+         * @param isCellInteraction true if the interaction is cell-based
+         */
         @Override
         public void acceptInteraction(AreaInteractionVisitor v, boolean isCellInteraction) {
         }
