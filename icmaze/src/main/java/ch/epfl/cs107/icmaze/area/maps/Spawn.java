@@ -1,5 +1,6 @@
 package ch.epfl.cs107.icmaze.area.maps;
 
+import ch.epfl.cs107.icmaze.actor.collectable.rare.Crystal;
 import ch.epfl.cs107.icmaze.actor.collectable.rare.Treasure;
 import ch.epfl.cs107.icmaze.area.ICMazeArea;
 import ch.epfl.cs107.icmaze.handler.DialogHandler;      // ✅ AJOUT
@@ -15,13 +16,14 @@ public class Spawn extends ICMazeArea {
 
     private boolean showTreasure;
     private Treasure treasure;
-
+    private Crystal crystal;
     public Spawn(DialogHandler dialogHandler) {
         super(name, SIDE_SIZE);
         this.dialogHandler = dialogHandler;
 
         showTreasure = false;
         treasure = new Treasure(this, new DiscreteCoordinates(2, 4));
+        crystal = new Crystal(this, new DiscreteCoordinates(4,4));
     }
 
     @Override
@@ -30,6 +32,7 @@ public class Spawn extends ICMazeArea {
 
         if (!welcomeShown) {
             welcomeShown = true;
+            registerActor(crystal);
             if (dialogHandler != null) {
                 dialogHandler.publish(new Dialog("welcome"));
             }

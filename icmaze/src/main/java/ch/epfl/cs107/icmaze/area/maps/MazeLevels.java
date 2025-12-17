@@ -2,11 +2,13 @@ package ch.epfl.cs107.icmaze.area.maps;
 import ch.epfl.cs107.icmaze.Difficulty;
 import ch.epfl.cs107.icmaze.MazeGenerator;
 import ch.epfl.cs107.icmaze.RandomGenerator;
-import ch.epfl.cs107.icmaze.actor.Rock;
+import ch.epfl.cs107.icmaze.actor.rocks.CommonRock;
 import ch.epfl.cs107.icmaze.actor.collectable.Key;
 import ch.epfl.cs107.icmaze.actor.enemies.LogMonster;
+import ch.epfl.cs107.icmaze.actor.rocks.CrystalRock;
+import ch.epfl.cs107.icmaze.actor.rocks.GoldenRock;
+import ch.epfl.cs107.icmaze.actor.rocks.Rock;
 import ch.epfl.cs107.icmaze.area.ICMazeArea;
-import ch.epfl.cs107.play.engine.actor.Actor;
 import ch.epfl.cs107.play.math.DiscreteCoordinates;
 import ch.epfl.cs107.play.math.Orientation;
 
@@ -143,9 +145,18 @@ public class MazeLevels extends ICMazeArea {
         for(int y = 0; y < getSizeSide() ; y++){
             for(int x = 0; x < getSizeSide() ; x++){
                 if(maze[y][x] == 1 && notInSpawn(x+1,y+1)){
-                    Rock rock = new Rock(this, new DiscreteCoordinates(x+1,y+1)); // +1 car on place le maze dans l'aire jouable
-                    walls.add(rock);
-                    registerActor(rock);
+                    double pRandomRock = RandomGenerator.rng.nextDouble();
+                    Rock chosenRock;
+                    DiscreteCoordinates rockPosition = new DiscreteCoordinates(x + 1,y + 1);  // +1 car on place le maze dans l'aire jouable
+                    if ( pRandomRock > 0.7) {
+                        chosenRock = new CrystalRock(this, rockPosition);
+                    } else if (0.6 < pRandomRock) {
+                        chosenRock = new GoldenRock(this, rockPosition);
+                    }else{
+                        chosenRock = new CommonRock(this, rockPosition);
+                    }
+                    walls.add(chosenRock);
+                    registerActor(chosenRock);
                 }else{
                     chemins[x + 1][y + 1] = true;
                 }

@@ -4,18 +4,17 @@ import ch.epfl.cs107.icmaze.KeyBindings;
 import ch.epfl.cs107.icmaze.actor.collectable.Heart;
 import ch.epfl.cs107.icmaze.actor.collectable.Key;
 import ch.epfl.cs107.icmaze.actor.collectable.Pickaxe;
-import ch.epfl.cs107.icmaze.actor.enemies.Boss;
+import ch.epfl.cs107.icmaze.actor.collectable.rare.RareItems;
 import ch.epfl.cs107.icmaze.actor.enemies.Enemy;
+import ch.epfl.cs107.icmaze.actor.rocks.CommonRock;
+import ch.epfl.cs107.icmaze.actor.rocks.Rock;
 import ch.epfl.cs107.icmaze.handler.ICMazeInteractionVisitor;
 import ch.epfl.cs107.play.areagame.actor.Interactable;
 import ch.epfl.cs107.play.areagame.actor.Interactor;
 import ch.epfl.cs107.play.areagame.actor.MovableAreaEntity;
 import ch.epfl.cs107.play.areagame.area.Area;
 import ch.epfl.cs107.play.areagame.handler.AreaInteractionVisitor;
-import ch.epfl.cs107.play.engine.actor.Animation;
 import ch.epfl.cs107.play.engine.actor.OrientedAnimation;
-import ch.epfl.cs107.play.engine.actor.Sprite;
-import ch.epfl.cs107.play.engine.actor.TextGraphics;
 import ch.epfl.cs107.play.math.DiscreteCoordinates;
 import ch.epfl.cs107.play.math.Orientation;
 import ch.epfl.cs107.play.math.Transform;
@@ -23,7 +22,6 @@ import ch.epfl.cs107.play.math.Vector;
 import ch.epfl.cs107.play.window.Button;
 import ch.epfl.cs107.play.window.Keyboard;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -42,9 +40,6 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
     private final  Orientation[] orders = {DOWN, RIGHT, UP, LEFT};
     private final OrientedAnimation playerAnimation = new OrientedAnimation(prefix, ANIMATION_DURATION, this,anchor, orders, 4, 1, 2, 16, 32, true);
 
-    // Inventaire des cles
-    private final ArrayList<Integer> keysID = new ArrayList<Integer>();
-
     // Info du portail a traverser
     private String destinationArea;
     private DiscreteCoordinates destinationCoordinates;
@@ -55,7 +50,6 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
     private boolean isDead = false;
 
     // Pickaxe
-    private boolean hasPickaxe = false;
     private boolean isRock = false;
     private boolean hasAttacked = false;
 
@@ -72,7 +66,7 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
     private int immunityFrames = 0;
     private boolean isImmune = false;
 
-    private final Invertory inventory = new Invertory();
+    private final Inventory inventory = new Inventory();
 
     /**
      * @param owner (Area) area to which the player belong
@@ -111,8 +105,8 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
         }
         @Override
         public void interactWith(Pickaxe pickaxe,boolean isCellInteraction){
-            if(isCellInteraction){
-                hasPickaxe = true;
+            if(isCellInteraction && !getInventory().hasPickaxe()){
+                getInventory().addPickaxe();
                 pickaxe.hide();
             }
         }
@@ -120,10 +114,8 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
         @Override
         public void interactWith(Key key, boolean isCellInteraction){
             if(isCellInteraction){
-                keysID.add(key.getIdentificator());
+                getInventory().addKey(key.getIdentificator());
                 key.hide();
-                getInventory().add(Invertory.Item.KEY, 1);
-
             }
         }
 
@@ -133,9 +125,10 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
                 destinationArea = portal.getDestinationArea();
                 destinationCoordinates =  portal.getDestinationCoordinates();
             } else if(isViewInteractable() && state.equals(PlayerState.INTERACTING)){
-                for(int i = 0; i < keysID.size(); i++){
-                    if(portal.open(keysID.get(i))){
-                        keysID.remove(i); // Enleve la cle si utilisee
+                ArrayList<Integer> keys = getInventory().getKeysIds();
+                for(int i = 0; i < keys.size(); i++){
+                    if(portal.open(keys.get(i))){
+                        getInventory().useKey(keys.get(i));
                     }
                 }
             }
@@ -155,6 +148,14 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
             if(enemy.isViewInteractable() && !hasAttacked && !enemy.isDead() && state.equals(PlayerState.ATTACKING_WITH_PICKAXE)){
                 hasAttacked = true;
                 enemy.loseHP(1);
+            }
+        }
+
+        @Override
+        public void interactWith(RareItems rareItems, boolean isCellInteraction){
+            if(isCellInteraction){
+                getInventory().addValue(rareItems.getValue());
+                rareItems.hide();
             }
         }
     }
@@ -177,7 +178,7 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
         destinationCoordinates = null;
     }
 
-    public Invertory getInventory() {
+    public Inventory getInventory() {
         return inventory;
     }
     /**
@@ -226,7 +227,7 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
                     state = PlayerState.INTERACTING;
                 }
 
-                if (keyboard.get(keys.pickaxe()).isPressed()&& hasPickaxe) {
+                if (keyboard.get(keys.pickaxe()).isPressed() && getInventory().hasPickaxe()) {
                     state = PlayerState.ATTACKING_WITH_PICKAXE;
                 }
                 break;
@@ -254,7 +255,7 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
      */
     @Override
     public void draw(ch.epfl.cs107.play.window.Canvas canvas) {
-        inventory.draw(canvas); // UI par-dessus tout
+        getInventory().draw(canvas, getOwnerArea().getCameraScaleFactor());
         if (isImmune) {
             if (immunityFrames % 2 == 0) {
                 currentAnimation.draw(canvas);
@@ -267,6 +268,7 @@ public class ICMazePlayer extends MovableAreaEntity implements Interactor, Inter
         if (health.isOn()) {
             health.draw(canvas);
         }
+
     }
 
     public void loseHP(int HP) {

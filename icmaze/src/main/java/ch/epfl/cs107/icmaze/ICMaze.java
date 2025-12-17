@@ -1,25 +1,18 @@
     package ch.epfl.cs107.icmaze;
 
     import ch.epfl.cs107.icmaze.actor.ICMazePlayer;
-    import ch.epfl.cs107.icmaze.actor.Portal;
-    import ch.epfl.cs107.icmaze.actor.Rock;
+    import ch.epfl.cs107.icmaze.actor.rocks.CommonRock;
     import ch.epfl.cs107.icmaze.actor.collectable.Heart;
     import ch.epfl.cs107.icmaze.actor.collectable.Key;
     import ch.epfl.cs107.icmaze.actor.collectable.Pickaxe;
-    import ch.epfl.cs107.icmaze.actor.enemies.Enemy;
-    import ch.epfl.cs107.icmaze.actor.enemies.LogMonster;
     import ch.epfl.cs107.icmaze.area.ICMazeArea;
     import ch.epfl.cs107.icmaze.area.maps.*;
     import ch.epfl.cs107.icmaze.handler.DialogHandler;
     import ch.epfl.cs107.play.areagame.AreaGame;
-    import ch.epfl.cs107.play.areagame.area.Area;
     import ch.epfl.cs107.play.engine.actor.Dialog;
     import ch.epfl.cs107.play.io.FileSystem;
     import ch.epfl.cs107.play.math.DiscreteCoordinates;
     import ch.epfl.cs107.play.math.Orientation;
-    import ch.epfl.cs107.play.math.Vector;
-    import ch.epfl.cs107.play.signal.logic.Logic;
-    import ch.epfl.cs107.play.window.Canvas;
     import ch.epfl.cs107.play.window.Keyboard;
     import ch.epfl.cs107.play.window.Window;
 
@@ -38,7 +31,7 @@
         private static final DiscreteCoordinates key1Position = new DiscreteCoordinates(6, 5);
         private static final DiscreteCoordinates key2Position = new DiscreteCoordinates(1, 2);
 
-        private Rock rock;
+        private CommonRock commonRock;
         private static final DiscreteCoordinates rockPosition = new DiscreteCoordinates(3, 3);
 
         // Positions initiales des entites de la map
@@ -86,7 +79,7 @@
 
         private void createAreas() {
             //     generateHardCodedLevel();
-            ICMazeArea[] generatedAreas = LevelGenerator.generateLine(this, 0); // 3 aires labyrinthiques
+            ICMazeArea[] generatedAreas = LevelGenerator.generateLine(this, 4); // 3 aires labyrinthiques
 
             // Ajouter toutes les aires au jeu
             for (ICMazeArea area : generatedAreas) {
@@ -212,7 +205,7 @@
             player = new ICMazePlayer(area, Orientation.UP, initialPostion, "player", 5);
             player.enterArea(area, initialPostion);
             player.centerCamera();
-
+            player.getInventory().setWindowSize(getWindow().getWidth(), getWindow().getHeight());
             // Inititalise la pioche
             pickaxe = new Pickaxe(area, initialPickaxePosition);
             area.registerActor(pickaxe);

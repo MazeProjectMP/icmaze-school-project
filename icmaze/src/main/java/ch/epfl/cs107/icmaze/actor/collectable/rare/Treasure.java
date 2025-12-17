@@ -15,10 +15,6 @@ import java.util.List;
 
 public class Treasure extends RareItems {
 
-    private final static int ANIMATION_DURATION =24;
-
-    private boolean isVisible;
-
     private Sprite treasure;
 
     private RegionOfInterest treasureRegion;
@@ -32,9 +28,7 @@ public class Treasure extends RareItems {
      * @param position (DiscreteCoordinates): the initial position of the treasure
      */
     public Treasure(Area currentArea, DiscreteCoordinates position) {
-        super(currentArea, Orientation.DOWN, position, 100);
-
-        isVisible = true;
+        super(currentArea, position, 100);
 
         message = new TextGraphics("treasure", 0.2f, new Color(133,21,0));
         message.setParent(this);
@@ -49,74 +43,9 @@ public class Treasure extends RareItems {
      */
     @Override
     public void draw(ch.epfl.cs107.play.window.Canvas canvas) {
-        if (isVisible) {
+        if (isVisible()) {
             treasure.draw(canvas);
             message.draw(canvas);
-        }
-    }
-
-    /**
-     * Updates the treasure animation if it is visible.
-     * @param deltaTime (float): time elapsed since last update
-     */
-    @Override
-    public void update(float deltaTime) {
-
-    }
-
-    /**
-     * Gets the list of cells currently occupied by the treasure.
-     * @return (List<DiscreteCoordinates>): a singleton list containing the main cell coordinates
-     */
-    @Override
-    public List<DiscreteCoordinates> getCurrentCells() {
-        return Collections.singletonList(getCurrentMainCellCoordinates());
-    }
-
-    /**
-     * Indicates whether the treasure blocks the cell it occupies.
-     * @return (boolean): {@code false}, as the treasure does not block movement
-     */
-    @Override
-    public boolean takeCellSpace() {
-        return false;
-    }
-
-    /**
-     * Indicates whether the treasure can be interacted with via cell interaction.
-     * @return (boolean): {@code true} if the treasure is cell-interactable
-     */
-    @Override
-    public boolean isCellInteractable() {
-        return true;
-    }
-
-    /**
-     * Indicates whether the treasure can be interacted with from a distance.
-     * @return (boolean): {@code false}, as the treasure is not view-interactable
-     */
-    @Override
-    public boolean isViewInteractable() {
-        return false;
-    }
-
-    /**
-     * Accepts an interaction from an area interaction visitor.
-     * @param v (AreaInteractionVisitor): the interaction visitor
-     * @param isCellInteraction (boolean): whether the interaction is a cell interaction
-     */
-    @Override
-    public void acceptInteraction(AreaInteractionVisitor v, boolean isCellInteraction) {
-        ((ICMazeInteractionVisitor) v).interactWith(this, isCellInteraction);
-    }
-
-    /**
-     * Hides the treasure and removes it from the area.
-     */
-    public void hide() {
-        if (isVisible) {
-            isVisible = false;
-            getOwnerArea().unregisterActor(this);
         }
     }
 }

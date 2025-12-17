@@ -1,6 +1,6 @@
-package ch.epfl.cs107.icmaze.actor;
+package ch.epfl.cs107.icmaze.actor.rocks;
 
-import ch.epfl.cs107.icmaze.RandomGenerator;
+import ch.epfl.cs107.icmaze.actor.Health;
 import ch.epfl.cs107.icmaze.actor.collectable.Heart;
 import ch.epfl.cs107.icmaze.area.maps.MazeLevels;
 import ch.epfl.cs107.icmaze.handler.ICMazeInteractionVisitor;
@@ -18,23 +18,11 @@ import ch.epfl.cs107.play.window.Canvas;
 import java.util.Collections;
 import java.util.List;
 
-
-/**
- * Represents a destructible rock in the game.
- * <p>
- * A rock is an obstacle that blocks movement while intact. It can be damaged from a distance,
- * becomes temporarily immune after taking damage, and disappears with a vanishing animation
- * when destroyed. When the animation completes, it may spawn a {@link Heart} and updates the
- * walkable graph of the current {@link MazeLevels}.
- * </p>
- */
-
-public class Rock extends AreaEntity {
-
-    private Sprite sprite;
-    private boolean isBroken;
+public abstract class Rock extends AreaEntity {
     private final int maxHP;
     private int currentHP;
+    private boolean isBroken;
+
     private Animation vanishAnimation = new Animation(
             "icmaze/vanish", 7, 2, 2, this,
             32, 32, new Vector(-0.5f, 0.0f),
@@ -47,22 +35,19 @@ public class Rock extends AreaEntity {
     private static final int IMMUNITY_DURATION = 20;
     private int immunityFrames ;
     private boolean isImmune ;
+    private Sprite sprite;
 
-    /**
-     * Creates a new rock at the given position in the specified area.
-     * @param area (Area): the area where the rock is located
-     * @param position (DiscreteCoordinates): the initial position of the rock
-     */
-    public Rock(Area area, DiscreteCoordinates position) {
+    public Rock(Area area, DiscreteCoordinates position, int maxHP, String spiteName) {
         super(area, Orientation.LEFT, position);
-        sprite = new Sprite("rock.2", 1, 1, this);
 
-        maxHP = 3;
-        currentHP = maxHP;
-        health = new Health(this, Transform.I.translated(0, 1.3f), maxHP, true);
-        isVanishing = false;
-        immunityFrames = 0;
-        isImmune= false;
+        this.maxHP = maxHP;
+        this.currentHP = maxHP;
+        this.health = new Health(this, Transform.I.translated(0, 1.3f), maxHP, true);
+        this.isVanishing = false;
+        this.immunityFrames = 0;
+        this.isImmune= false;
+        this.isBroken = false;
+        this.sprite = new Sprite(spiteName, 1, 1, this);
     }
 
     /**
@@ -106,15 +91,12 @@ public class Rock extends AreaEntity {
         if (isVanishing) {
             vanishAnimation.update(deltaTime);
             if (vanishAnimation.isCompleted()) {
-                if (RandomGenerator.rng.nextDouble() < 0.5) {
-                    Heart heart = new Heart(getOwnerArea(), getCurrentMainCellCoordinates());
-                    getOwnerArea().registerActor(heart);
-                }
-                ((MazeLevels) getOwnerArea()).addWalkableCellToGraph(getCurrentMainCellCoordinates());
-                getOwnerArea().unregisterActor(this);
+                lootSpawn();
             }
         }
     }
+
+    abstract void lootSpawn();
 
     public void breakWall(){
         currentHP = 0;
@@ -197,4 +179,3 @@ public class Rock extends AreaEntity {
         return isBroken;
     }
 }
-
